@@ -80,3 +80,10 @@ CREATE TABLE "exchange_rates" (
     PRIMARY KEY ("id"),
     UNIQUE("from_currency", "to_currency", "date")
 );
+
+--- Indexes
+
+CREATE INDEX transactions_account_index ON "transactions"("account_id");
+CREATE INDEX transactions_category_index ON "transactions"("category_id");
+CREATE INDEX transactions_date_index ON "transactions"("transaction_date");
+CREATE INDEX budgets_user_month_index ON "budgets"("user_id", "month", "year");
