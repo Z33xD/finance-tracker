@@ -35,7 +35,7 @@ CREATE TABLE "transactions" (
     "account_id" INT REFERENCES "accounts"("id") ON DELETE CASCADE,
     "category_id" INT REFERENCES "categories"("id"),
     "amount" DECIMAL(12, 2) NOT NULL,
-    "transaction_rate" DATE NOT NULL,
+    "transaction_date" DATE NOT NULL,
     "description" VARCHAR(256),
     "transaction_type" VARCHAR(16), -- debit or credit for example
     "import_batch_id" INT,
