@@ -1,3 +1,5 @@
+-- Table Creations
+
 CREATE TABLE "users" (
      "id" SERIAL,
      "username" VARCHAR(32) UNIQUE NOT NULL,
@@ -30,7 +32,7 @@ CREATE TABLE "categories" (
 
 CREATE TABLE "transactions" (
     "id" SERIAL,
-    "user_id" INT REFERENCES "users"("id") ON DELETE CASCADE,
+    "account_id" INT REFERENCES "accounts"("id") ON DELETE CASCADE,
     "category_id" INT REFERENCES "categories"("id"),
     "amount" DECIMAL(12, 2) NOT NULL,
     "transaction_rate" DATE NOT NULL,
