@@ -1,0 +1,64 @@
+package com.fintrack.finance_tracker.users;
+
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Component
+public class UserService {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public List<User> getUsers() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> getUserById(int searchKey) {
+        return userRepository.findById(searchKey);
+    }
+
+    public List<User> getUsersByName(String searchText) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getUsername().toLowerCase().contains(searchText.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public List<User> getUsersByEmail(String searchText) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getEmail().toLowerCase().contains(searchText.toLowerCase()))
+                .collect(Collectors.toList());
+    }
+
+    public User addUser(User user) {
+        userRepository.save(user);
+        return user;
+    }
+
+    public User updateUser(User updatedUser) {
+        Optional<User> existingUser = userRepository.findById(updatedUser.getId());
+
+        if (existingUser.isPresent()) {
+            User userToUpdate = existingUser.get();
+            userToUpdate.setUsername(updatedUser.getUsername());
+            userToUpdate.setEmail(updatedUser.getEmail());
+            userToUpdate.setPassword_hash(updatedUser.getPassword_hash());
+
+            userRepository.save(userToUpdate);
+            return userToUpdate;
+        }
+        return null;
+    }
+
+    @Transactional
+    public void deleteUser(int id) {
+        userRepository.deleteById(id);
+    }
+}
