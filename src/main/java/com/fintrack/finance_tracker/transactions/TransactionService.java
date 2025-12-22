@@ -22,7 +22,7 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
 
-    public Optional<Transaction> getTransactionsById(int searchKey) {
+    public Optional<Transaction> getTransactionById(int searchKey) {
         return transactionRepository.findById(searchKey);
     }
 

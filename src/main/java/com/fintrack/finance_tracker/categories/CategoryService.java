@@ -21,7 +21,7 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Optional<Category> getCategoriesById(int searchKey) {
+    public Optional<Category> getCategoryById(int searchKey) {
         return categoryRepository.findById(searchKey);
     }
 
