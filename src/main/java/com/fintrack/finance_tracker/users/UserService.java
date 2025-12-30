@@ -42,14 +42,21 @@ public class UserService {
         return user;
     }
 
-    public User updateUser(User updatedUser) {
-        Optional<User> existingUser = userRepository.findById(updatedUser.getId());
+    public User updateUser(int id, User updatedUser) {
+        Optional<User> existingUser = userRepository.findById(id);
 
         if (existingUser.isPresent()) {
             User userToUpdate = existingUser.get();
-            userToUpdate.setUsername(updatedUser.getUsername());
-            userToUpdate.setEmail(updatedUser.getEmail());
-            userToUpdate.setPassword_hash(updatedUser.getPassword_hash());
+
+            if (updatedUser.getUsername() != null) {
+                userToUpdate.setUsername(updatedUser.getUsername());
+            }
+            if (updatedUser.getEmail() != null) {
+                userToUpdate.setEmail(updatedUser.getEmail());
+            }
+            if (updatedUser.getPassword_hash() != null) {
+                userToUpdate.setPassword_hash(updatedUser.getPassword_hash());
+            }
 
             userRepository.save(userToUpdate);
             return userToUpdate;

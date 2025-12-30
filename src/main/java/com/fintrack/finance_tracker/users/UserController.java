@@ -40,26 +40,39 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
+        return userService.getUserById(id)
+                .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    // TODO: GET /api/users/me (Retrieve currently authenticated user's profile)
+
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user) {
         User createdUser = userService.addUser(user);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        User resultUser = userService.updateUser(user);
-        if (resultUser != null) {
-            return new ResponseEntity<>(resultUser, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUserById(@PathVariable int id, @RequestBody User user) {
+        User updatedUser = userService.updateUser(id, user);
+        if (updatedUser != null) {
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable int userId) {
-        userService.deleteUser(userId);
+    // TODO: PUT /api/users/me (Update currently authenticated user's profile)
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable int id) {
+        userService.deleteUser(id);
         return new ResponseEntity<>("User deleted successfully!", HttpStatus.OK);
     }
+
+    // TODO: DELETE /api/users/me (Delete currently authenticated user's account)
 }
