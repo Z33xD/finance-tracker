@@ -34,8 +34,8 @@ public class BudgetService {
         return budget;
     }
 
-    public Budget updateBudget(Budget updatedBudget) {
-        Optional<Budget> existingBudget = budgetRepository.findById(updatedBudget.getId());
+    public Budget updateBudget(int id, Budget updatedBudget) {
+        Optional<Budget> existingBudget = budgetRepository.findById(id);
 
         if (existingBudget.isPresent()) {
             Budget budgetToUpdate = existingBudget.get();
