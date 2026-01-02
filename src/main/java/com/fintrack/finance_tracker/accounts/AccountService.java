@@ -42,14 +42,21 @@ public class AccountService {
         return account;
     }
 
-    public Account updateAccount(Account updatedAccount) {
-        Optional<Account> existingAccount = accountRepository.findById(updatedAccount.getId());
+    public Account updateAccount(int id, Account updatedAccount) {
+        Optional<Account> existingAccount = accountRepository.findById(id);
 
         if (existingAccount.isPresent()) {
             Account accountToUpdate = existingAccount.get();
-            accountToUpdate.setAccount_name(updatedAccount.getAccount_name());
-            accountToUpdate.setAccount_type(updatedAccount.getAccount_type());
-            accountToUpdate.setCurrency(updatedAccount.getCurrency());
+
+            if (updatedAccount.getAccount_name() != null) {
+                accountToUpdate.setAccount_name(updatedAccount.getAccount_name());
+            }
+            if (updatedAccount.getAccount_type() != null) {
+                accountToUpdate.setAccount_type(updatedAccount.getAccount_type());
+            }
+            if (updatedAccount.getCurrency() != null) {
+                accountToUpdate.setCurrency(updatedAccount.getCurrency());
+            }
             accountToUpdate.setInitial_balance(updatedAccount.getInitial_balance());
 
             accountRepository.save(accountToUpdate);
