@@ -36,15 +36,27 @@ public class CategoryService {
         return category;
     }
 
-    public Category updateCategory(Category updatedCategory) {
-        Optional<Category> existingCategory = categoryRepository.findById(updatedCategory.getId());
+    public Category updateCategory(int id, Category updatedCategory) {
+        Optional<Category> existingCategory = categoryRepository.findById(id);
 
         if (existingCategory.isPresent()) {
             Category categoryToUpdate = existingCategory.get();
-            categoryToUpdate.setName(updatedCategory.getName());
-            categoryToUpdate.setType(updatedCategory.getType());
-            categoryToUpdate.setIcon(updatedCategory.getIcon());
-            categoryToUpdate.setColour(updatedCategory.getColour());
+
+            if (updatedCategory.getName() != null) {
+                categoryToUpdate.setName(updatedCategory.getName());
+            }
+
+            if (updatedCategory.getType() != null) {
+                categoryToUpdate.setType(updatedCategory.getType());
+            }
+
+            if (updatedCategory.getIcon() != null) {
+                categoryToUpdate.setIcon(updatedCategory.getIcon());
+            }
+
+            if (updatedCategory.getColour() != null) {
+                categoryToUpdate.setColour(updatedCategory.getColour());
+            }
 
             categoryRepository.save(categoryToUpdate);
             return categoryToUpdate;
