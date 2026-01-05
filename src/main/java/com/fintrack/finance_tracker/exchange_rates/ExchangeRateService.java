@@ -1,5 +1,6 @@
 package com.fintrack.finance_tracker.exchange_rates;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,18 +45,32 @@ public class ExchangeRateService {
         return exchangeRate;
     }
 
-    public ExchangeRate updateExchangeRate (ExchangeRate updatedExchangeRate) {
-        Optional<ExchangeRate> existingExchangeRate = exchangeRateRepository.findById(updatedExchangeRate.getId());
+    public ExchangeRate updateExchangeRate (int id, ExchangeRate updatedExchangeRate) {
+        Optional<ExchangeRate> existingExchangeRate = exchangeRateRepository.findById(id);
 
         if (existingExchangeRate.isPresent()) {
             ExchangeRate exchangeRateToUpdate = existingExchangeRate.get();
-            exchangeRateToUpdate.setFrom_currency(updatedExchangeRate.getFrom_currency());
-            exchangeRateToUpdate.setTo_currency(updatedExchangeRate.getTo_currency());
+
+            if (updatedExchangeRate.getFrom_currency() != null) {
+                exchangeRateToUpdate.setFrom_currency(updatedExchangeRate.getFrom_currency());
+            }
+            if (updatedExchangeRate.getTo_currency() != null) {
+                exchangeRateToUpdate.setTo_currency(updatedExchangeRate.getTo_currency());
+            }
+
             exchangeRateToUpdate.setRate(updatedExchangeRate.getRate());
-            exchangeRateToUpdate.setDate(updatedExchangeRate.getDate());
+
+            if (updatedExchangeRate.getDate() != null) {
+                exchangeRateToUpdate.setDate(updatedExchangeRate.getDate());
+            }
 
             exchangeRateRepository.save(exchangeRateToUpdate);
         }
         return null;
+    }
+
+    @Transactional
+    public void deleteExchangeRate(int id) {
+        exchangeRateRepository.deleteById(id);
     }
 }
