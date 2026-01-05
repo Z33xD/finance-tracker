@@ -17,6 +17,10 @@ public class ImportBatchService {
         this.importBatchRepository = importBatchRepository;
     }
 
+    public List<ImportBatch> getImportBatches() {
+        return importBatchRepository.findAll();
+    }
+
     public Optional<ImportBatch> getImportBatchById(int searchKey) {
         return importBatchRepository.findById(searchKey);
     }
