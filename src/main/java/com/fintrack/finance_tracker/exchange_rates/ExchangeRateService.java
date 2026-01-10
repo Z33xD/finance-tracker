@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +43,9 @@ public class ExchangeRateService {
 
     public ExchangeRate addExchangeRate (ExchangeRate exchangeRate) {
         exchangeRateRepository.save(exchangeRate);
+        if (exchangeRate.getCreated_at() == null) {
+            exchangeRate.setCreated_at(LocalDateTime.now());
+        }
         return exchangeRate;
     }
 
