@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -84,6 +85,9 @@ public class ImportBatchService {
     }
 
     public ImportBatch processCsv(MultipartFile file) {
+
+        validateFile(file);
+
         ImportBatch batch = new ImportBatch();
         batch.setFile_name(file.getOriginalFilename());
         batch.setStatus("Pending");
@@ -152,5 +156,15 @@ public class ImportBatchService {
         batch.setTotal_records(total);
         batch.setSuccessful_records(success);
         batch.setFailed_records(failed);
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty.");
+        }
+
+        if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
+            throw new IllegalArgumentException("Only CSV files supported");
+        }
     }
 }
