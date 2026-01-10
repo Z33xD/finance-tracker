@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +40,9 @@ public class UserService {
 
     public User addUser(User user) {
         userRepository.save(user);
+        if (user.getCreated_at() == null) {
+            user.setCreated_at(LocalDateTime.now());
+        }
         return user;
     }
 

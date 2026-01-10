@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +35,12 @@ public class TransactionService {
 
     public Transaction addTransaction(Transaction transaction) {
         transactionRepository.save(transaction);
+        if (transaction.getDatetime() == null) {
+            transaction.setDatetime(LocalDateTime.now());
+        }
+        if (transaction.getTransaction_date() == null) {
+            transaction.setTransaction_date(LocalDate.now());
+        }
         return transaction;
     }
 
