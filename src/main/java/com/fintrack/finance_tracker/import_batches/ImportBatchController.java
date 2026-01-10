@@ -2,8 +2,10 @@ package com.fintrack.finance_tracker.import_batches;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -50,7 +52,11 @@ public class ImportBatchController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    // TODO: POST /api/import-batches/upload (Upload a file for import, e.g., CSV)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ImportBatch> upload(@RequestParam("file") MultipartFile file) {
+        ImportBatch batch = importBatchService.processCsv(file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(batch);
+    }
 
     // TODO: GET /api/import-batches/{id}/transactions (Get transactions associated with a specific batch)
 
