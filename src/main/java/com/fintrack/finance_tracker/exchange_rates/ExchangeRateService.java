@@ -2,7 +2,10 @@ package com.fintrack.finance_tracker.exchange_rates;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,10 +15,15 @@ import java.util.stream.Collectors;
 
 @Component
 public class ExchangeRateService {
+    private final WebClient webClient;
     private final ExchangeRateRepository exchangeRateRepository;
 
+    @Value("${exchangeRate.api.key}")
+    private String apiKey;
+
     @Autowired
-    public ExchangeRateService(ExchangeRateRepository exchangeRateRepository) {
+    public ExchangeRateService(WebClient webClient, ExchangeRateRepository exchangeRateRepository) {
+        this.webClient = webClient;
         this.exchangeRateRepository = exchangeRateRepository;
     }
 
@@ -76,5 +84,30 @@ public class ExchangeRateService {
     @Transactional
     public void deleteExchangeRate(int id) {
         exchangeRateRepository.deleteById(id);
+    }
+
+    public ExchangeRate refreshRate(String base, String target, LocalDate date) {
+        String uri = String.format("/%s/latest/%s", apiKey, base);
+
+        JsonNode response = webClient.get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+
+        assert response != null;
+        double rate = response
+                .path("conversion_rates")
+                .path(target)
+                .doubleValue();
+
+        return getExchangeRatesByFromToAndDate(base, target, date)
+                .map(existing -> {
+                    existing.setRate(rate);
+                    return exchangeRateRepository.save(existing);
+                })
+                .orElseGet(() -> exchangeRateRepository.save(
+                        new ExchangeRate(base, target, rate, date, LocalDateTime.now())
+                ));
     }
 }

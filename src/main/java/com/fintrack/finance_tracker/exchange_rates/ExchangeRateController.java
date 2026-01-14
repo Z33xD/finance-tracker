@@ -82,5 +82,12 @@ public class ExchangeRateController {
         return new ResponseEntity<>("Exchange rate deleted successfully!", HttpStatus.OK);
     }
 
-    // TODO: POST /api/exchange-rates/refresh (Trigger an update/refresh of rates from the external source)
+    @PostMapping("/refresh")
+    public ResponseEntity<ExchangeRate> refreshTodayRate(
+            @RequestParam String base,
+            @RequestParam String target
+    ) {
+        ExchangeRate refreshed = exchangeRateService.refreshRate(base, target, LocalDate.now());
+        return new ResponseEntity<>(refreshed, HttpStatus.OK);
+    }
 }
