@@ -1,9 +1,6 @@
 package com.fintrack.finance_tracker.exchange_rates;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,8 +9,9 @@ import java.time.LocalDateTime;
 @Table(name = "exchange_rates")
 public class ExchangeRate {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     private String from_currency;
 
@@ -34,6 +32,13 @@ public class ExchangeRate {
         this.created_at = created_at;
     }
 
+    public ExchangeRate(String from_currency, String to_currency, double rate, LocalDate date, LocalDateTime created_at) {
+        this.from_currency = from_currency;
+        this.to_currency = to_currency;
+        this.rate = rate;
+        this.date = date;
+        this.created_at = created_at;
+    }
 
     public ExchangeRate() {}
 
