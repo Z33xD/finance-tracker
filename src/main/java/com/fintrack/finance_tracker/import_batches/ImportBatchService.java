@@ -136,6 +136,17 @@ public class ImportBatchService {
                     double amount = Double.parseDouble(amountStr.replace(",", ""));
                     LocalDate transactionDate = LocalDate.parse(transactionDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
+                    boolean isDuplicate = transactionRepository
+                            .findByTransactionDateAndAmountAndDescriptionAndCategoryIdAndTransactionType(
+                                    transactionDate, amount, description, categoryId, transactionType
+                            ).isPresent();
+
+                    if (isDuplicate) {
+                        System.out.println("Duplicate transaction found!");
+                        failed++;
+                        continue;
+                    }
+
                     Transaction transaction = new Transaction();
                     transaction.setCategory_id(categoryId);
                     transaction.setAmount(amount);
@@ -147,7 +158,8 @@ public class ImportBatchService {
 
                     transactionRepository.save(transaction);
                     success++;
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     failed++;
                 }
             }
