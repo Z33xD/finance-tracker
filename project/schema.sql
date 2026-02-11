@@ -6,6 +6,9 @@ CREATE TABLE "users" (
      "email" VARCHAR(64) UNIQUE NOT NULL,
      "password_hash" VARCHAR(256) NOT NULL,
      "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+     "enabled" BOOLEAN NOT NULL DEFAULT FALSE,
+     "verification_code" VARCHAR(64),
+     "verification_expiration" TIMESTAMP,
      PRIMARY KEY ("id")
 );
 
