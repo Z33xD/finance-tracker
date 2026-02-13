@@ -40,8 +40,8 @@ public class UserService {
 
     public User addUser(User user) {
         userRepository.save(user);
-        if (user.getCreated_at() == null) {
-            user.setCreated_at(LocalDateTime.now());
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
         }
         return user;
     }
@@ -52,14 +52,12 @@ public class UserService {
         if (existingUser.isPresent()) {
             User userToUpdate = existingUser.get();
 
-            if (updatedUser.getUsername() != null) {
-                userToUpdate.setUsername(updatedUser.getUsername());
-            }
+            userToUpdate.setUsername(updatedUser.getUsername());
             if (updatedUser.getEmail() != null) {
                 userToUpdate.setEmail(updatedUser.getEmail());
             }
-            if (updatedUser.getPassword_hash() != null) {
-                userToUpdate.setPassword_hash(updatedUser.getPassword_hash());
+            if (updatedUser.getPasswordHash() != null) {
+                userToUpdate.setPasswordHash(updatedUser.getPasswordHash());
             }
 
             userRepository.save(userToUpdate);
