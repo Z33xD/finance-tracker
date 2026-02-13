@@ -1,41 +1,55 @@
 package com.fintrack.finance_tracker.users;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.jspecify.annotations.NonNull;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name="users")
-public class User {
+public class User implements UserDetails {
     @Id
     @Column(name = "id", unique = true)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
+    @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
-    private String password_hash;
+    @Column(nullable = false)
+    private String passwordHash;
 
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     private boolean enabled;
 
-    private String verification_code;
+    @Column(name="verification_code")
+    private String verificationCode;
 
-    private LocalDateTime verification_expiration;
+    @Column(name="verification_expiration")
+    private LocalDateTime verificationExpiration;
 
-    public User(int id, String username, String email, String password_hash, LocalDateTime created_at, boolean enabled, String verification_code, LocalDateTime verification_expiration) {
+    public User(int id, String username, String email, String passwordHash, LocalDateTime createdAt, boolean enabled, String verificationCode, LocalDateTime verificationExpiration) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.password_hash = password_hash;
-        this.created_at = created_at;
+        this.passwordHash = passwordHash;
+        this.createdAt = createdAt;
         this.enabled = enabled;
-        this.verification_code = verification_code;
-        this.verification_expiration = verification_expiration;
+        this.verificationCode = verificationCode;
+        this.verificationExpiration = verificationExpiration;
+    }
+
+    public User(String username, String email, String passwordHash) {
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
     }
 
     public User() {}
@@ -48,6 +62,8 @@ public class User {
         this.id = id;
     }
 
+    @Override
+    @NonNull
     public String getUsername() {
         return username;
     }
@@ -64,22 +80,28 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword_hash() {
-        return password_hash;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword_hash(String password_hash) {
-        this.password_hash = password_hash;
+    @Override
+    public String getPassword() {
+        return passwordHash;
     }
 
-    public LocalDateTime getCreated_at() {
-        return created_at;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -88,20 +110,40 @@ public class User {
         this.enabled = enabled;
     }
 
-    public String getVerification_code() {
-        return verification_code;
+    public String getVerificationCode() {
+        return verificationCode;
     }
 
-    public void setVerification_code(String verification_code) {
-        this.verification_code = verification_code;
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
     }
 
-    public LocalDateTime getVerification_expiration() {
-        return verification_expiration;
+    public LocalDateTime getVerificationExpiration() {
+        return verificationExpiration;
     }
 
-    public void setVerification_expiration(LocalDateTime verification_expiration) {
-        this.verification_expiration = verification_expiration;
+    public void setVerificationExpiration(LocalDateTime verificationExpiration) {
+        this.verificationExpiration = verificationExpiration;
     }
 
+    @Override
+    @NonNull
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 }
