@@ -85,7 +85,97 @@ Video overview: <URL HERE>
 
 ### Relationships
 
-<!-- TODO: don't forget entity relationship diagram -->
+```mermaid
+erDiagram
+    USERS ||--o{ ACCOUNTS        : "owns"
+    USERS ||--o{ CATEGORIES      : "assigns"
+    USERS ||--o{ BUDGETS         : "sets"
+    USERS ||--o{ IMPORT_BATCHES  : "uploads"
+
+    ACCOUNTS ||--o{ TRANSACTIONS     : "contains"
+    CATEGORIES ||--o{ TRANSACTIONS   : "classifies"
+    CATEGORIES ||--o{ BUDGETS        : "has"
+    IMPORT_BATCHES ||--o{ TRANSACTIONS : "produces"
+
+    EXCHANGE_RATES }o--|| CURRENCY_PAIR : "(from→to)"
+
+    USERS {
+        int     id                  PK
+        varchar username            UK
+        varchar email               UK
+        varchar password_hash
+        timestamp created_at
+        boolean enabled
+        varchar verification_code
+        timestamp verification_expiration
+    }
+
+    ACCOUNTS {
+        int     id              PK
+        int     user_id         FK
+        varchar account_name
+        varchar account_type
+        char    currency        "default 'INR'"
+        decimal initial_balance
+        timestamp created_at
+    }
+
+    CATEGORIES {
+        int     id          PK
+        int     user_id     FK
+        varchar name        "short name"
+        varchar type        "income/expense"
+        char    icon
+        varchar colour      "hex #RRGGBB"
+    }
+
+    TRANSACTIONS {
+        int     id                  PK
+        int     account_id          FK
+        int     category_id         FK "nullable"
+        decimal amount
+        date    transaction_date
+        varchar description
+        varchar transaction_type    "debit/credit/..."
+        int     import_batch_id     FK "nullable"
+        timestamp datetime
+    }
+
+    BUDGETS {
+        int     id          PK
+        int     user_id     FK
+        int     category_id FK
+        decimal amount
+        int     month       "1–12"
+        int     year
+        timestamp created_at
+        UK "user+category+month+year"
+    }
+
+    IMPORT_BATCHES {
+        int     id                  PK
+        int     user_id             FK
+        varchar file_name
+        varchar import_type
+        varchar status
+        int     total_records
+        int     successful_records
+        int     failed_records
+        timestamp started_at
+        timestamp completed_at
+        text    error_message
+    }
+
+    EXCHANGE_RATES {
+        int     id              PK
+        char    from_currency
+        char    to_currency
+        decimal rate            "e.g. 10.6 digits"
+        date    date
+        timestamp created_at
+        UK "from+to+date"
+    }
+```
 
 * A user can have many accounts, categories, budgets, import batches, and transactions.
 * An account belongs to one user and can have many transactions.
