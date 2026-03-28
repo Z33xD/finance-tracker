@@ -3,6 +3,8 @@ package com.fintrack.finance_tracker.users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -47,7 +49,13 @@ public class UserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    // TODO: GET /api/users/me (Retrieve currently authenticated user's profile)
+    @GetMapping("/me")
+    public ResponseEntity<User> authenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        User currentUser = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(currentUser);
+    }
 
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody User user) {
