@@ -44,17 +44,21 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable int id) {
-        return userService.getUserById(id)
-                .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User currentUser = getAuthenticatedUser();
+
+        if (currentUser.getId() != id) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        User user = userService.getUserById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        return ResponseEntity.ok(user);
     }
 
     // Retrieve currently authenticated user's details
     @GetMapping("/me")
     public ResponseEntity<User> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assert authentication != null;
-        User currentUser = (User) authentication.getPrincipal();
+        User currentUser = getAuthenticatedUser();
         return ResponseEntity.ok(currentUser);
     }
 
@@ -66,12 +70,18 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUserById(@PathVariable int id, @RequestBody User user) {
-        User updatedUser = userService.updateUser(id, user);
-        if (updatedUser != null) {
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        User currentUser = getAuthenticatedUser();
+
+        if (currentUser.getId() != id) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        User updatedUser = userService.updateUser(id, user);
+
+        if (updatedUser != null) {
+            return ResponseEntity.ok(updatedUser);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -87,6 +97,7 @@ public class UserController {
         User currentUser = (User) authentication.getPrincipal();
 
         assert currentUser != null;
+        updatedData.setId(currentUser.getId());
         User updatedUser = userService.updateUser(currentUser.getId(), updatedData);
 
         if (updatedUser != null) {
@@ -98,14 +109,20 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable int id) {
+        User currentUser = getAuthenticatedUser();
+
+        if (currentUser.getId() != id) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
         userService.deleteUser(id);
-        return new ResponseEntity<>("User deleted successfully!", HttpStatus.OK);
+        return ResponseEntity.ok("User deleted successfully!");
     }
 
     // Delete currently authenticated user's account
     @DeleteMapping("/me")
     public ResponseEntity<String> deleteCurrentUser() {
-        Authentication authentication = SecurityContextHolder.createEmptyContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -116,5 +133,16 @@ public class UserController {
         userService.deleteUser(currentUser.getId());
 
         return ResponseEntity.ok("Your account has been deleted successfully!");
+    }
+
+    // Helper method to get the authenticated user
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        return (User) authentication.getPrincipal();
     }
 }
