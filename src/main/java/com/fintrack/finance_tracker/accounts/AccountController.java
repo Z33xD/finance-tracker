@@ -1,8 +1,11 @@
 package com.fintrack.finance_tracker.accounts;
 
+import com.fintrack.finance_tracker.users.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,62 +21,71 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    // Retrieve all accounts for the authenticated user
     @GetMapping
-    public List<Account> getAccounts(
-            @RequestParam(required = false) Integer id,
-            @RequestParam(required = false) Integer user_id,
-            @RequestParam(required = false) String account_type
-    ) {
-        if (id != null) {
-            return accountService.getAccountById(id)
-                    .map(List::of)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        }
-
-        else if (user_id != null) {
-            return accountService.getAccountsByUserId(user_id);
-        }
-
-        else if (account_type != null) {
-            return accountService.getAccountsByAccountType(account_type);
-        }
-
-        else {
-            return accountService.getAccounts();
-        }
+    public List<Account> getAccountsForCurrentUser() {
+        User currentUser = getAuthenticatedUser();
+        return accountService.getAccountsByUserId(currentUser.getId());
     }
-
-    // TODO: GET /api/accounts (Retrieve all accounts for the authenticated user)
 
     @GetMapping("/{id}")
     public ResponseEntity<Account> getAccountById(@PathVariable int id) {
-        return accountService.getAccountById(id)
-                .map(account -> new ResponseEntity<>(account, HttpStatus.OK))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User currentUser = getAuthenticatedUser();
+        Account account = accountService.getAccountById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (account.getUser_id() != currentUser.getId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        return ResponseEntity.ok(account);
     }
 
     @PostMapping
     public ResponseEntity<Account> addAccount(@RequestBody Account account) {
+        User currentUser = getAuthenticatedUser();
+        account.setUser_id(currentUser.getId());
+
         Account createdAccount = accountService.addAccount(account);
         return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Account> updateAccountById(@PathVariable int id, @RequestBody Account account) {
+        User currentUser = getAuthenticatedUser();
+
+        Account existing = accountService.getAccountById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (existing.getUser_id() != currentUser.getId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        account.setUser_id(currentUser.getId());
+
         Account updatedAccount = accountService.updateAccount(id, account);
-        if (updatedAccount != null) {
-            return new ResponseEntity<>(updatedAccount, HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.ok(updatedAccount);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAccount(@PathVariable int id) {
+        User currentUser = getAuthenticatedUser();
+        Account existing = accountService.getAccountById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (existing.getUser_id() != currentUser.getId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
         accountService.deleteAccount(id);
-        return new ResponseEntity<>("Account deleted successfully!", HttpStatus.OK);
+        return ResponseEntity.ok("Account deleted successfully!");
     }
 
-    // TODO: DELETE /api/users/me (Delete currently authenticated user's account)
+    // Helper method to get the authenticated user
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        return (User) authentication.getPrincipal();
+    }
 }
