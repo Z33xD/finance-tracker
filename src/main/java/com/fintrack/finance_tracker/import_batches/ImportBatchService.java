@@ -134,11 +134,11 @@ public class ImportBatchService {
 
                     int categoryId = Integer.parseInt(categoryIdStr);
                     double amount = Double.parseDouble(amountStr.replace(",", ""));
-                    LocalDate transactionDate = LocalDate.parse(transactionDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    LocalDate transaction_date = LocalDate.parse(transactionDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                     boolean isDuplicate = transactionRepository
                             .findByTransactionDateAndAmountAndDescriptionAndCategoryIdAndTransactionType(
-                                    transactionDate, amount, description, categoryId, transactionType
+                                    transaction_date, amount, description, categoryId, transactionType
                             ).isPresent();
 
                     if (isDuplicate) {
@@ -148,13 +148,13 @@ public class ImportBatchService {
                     }
 
                     Transaction transaction = new Transaction();
-                    transaction.setCategory_id(categoryId);
+                    transaction.setCategoryId(categoryId);
                     transaction.setAmount(amount);
-                    transaction.setTransaction_date(transactionDate);
+                    transaction.setTransactionDate(transaction_date);
                     transaction.setDescription(description);
-                    transaction.setTransaction_type(transactionType);
+                    transaction.setTransactionType(transactionType);
 
-                    transaction.setImport_batch_id(batch.getId());
+                    transaction.setImportBatchId(batch.getId());
 
                     transactionRepository.save(transaction);
                     success++;

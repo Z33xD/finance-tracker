@@ -29,7 +29,7 @@ public class TransactionService {
 
     public List<Transaction> getTransactionsByDate(LocalDate searchKey) {
         return transactionRepository.findAll().stream()
-                .filter(transaction -> (transaction.getTransaction_date().equals(searchKey)))
+                .filter(transaction -> (transaction.getTransactionDate().equals(searchKey)))
                 .collect(Collectors.toList());
     }
 
@@ -38,8 +38,8 @@ public class TransactionService {
         if (transaction.getDatetime() == null) {
             transaction.setDatetime(LocalDateTime.now());
         }
-        if (transaction.getTransaction_date() == null) {
-            transaction.setTransaction_date(LocalDate.now());
+        if (transaction.getTransactionDate() == null) {
+            transaction.setTransactionDate(LocalDate.now());
         }
         return transaction;
     }
@@ -49,25 +49,25 @@ public class TransactionService {
 
         if (existingTransaction.isPresent()) {
             Transaction transactionToUpdate = existingTransaction.get();
-            transactionToUpdate.setAccount_id(updatedTransaction.getAccount_id());
+            transactionToUpdate.setAccountId(updatedTransaction.getAccount_id());
 
-            transactionToUpdate.setCategory_id(updatedTransaction.getCategory_id());
+            transactionToUpdate.setCategoryId(updatedTransaction.getCategoryId());
 
             transactionToUpdate.setAmount(updatedTransaction.getAmount());
 
-            if (updatedTransaction.getTransaction_date() != null) {
-                transactionToUpdate.setTransaction_date(updatedTransaction.getTransaction_date());
+            if (updatedTransaction.getTransactionDate() != null) {
+                transactionToUpdate.setTransactionDate(updatedTransaction.getTransactionDate());
             }
 
             if (updatedTransaction.getDescription() != null) {
                 transactionToUpdate.setDescription(updatedTransaction.getDescription());
             }
 
-            if (updatedTransaction.getTransaction_type() != null) {
-                transactionToUpdate.setTransaction_type(updatedTransaction.getTransaction_type());
+            if (updatedTransaction.getTransactionType() != null) {
+                transactionToUpdate.setTransactionType(updatedTransaction.getTransactionType());
             }
 
-            transactionToUpdate.setImport_batch_id(updatedTransaction.getImport_batch_id());
+            transactionToUpdate.setImportBatchId(updatedTransaction.getImportBatchId());
 
             transactionRepository.save(transactionToUpdate);
             return transactionToUpdate;
@@ -80,31 +80,31 @@ public class TransactionService {
 
         if (category_id != null) {
             transactions = transactions.stream()
-                    .filter(transaction -> (transaction.getCategory_id() == category_id))
+                    .filter(transaction -> (transaction.getCategoryId() == category_id))
                     .collect(Collectors.toList());
         }
 
         if (transaction_type != null) {
             transactions = transactions.stream()
-                    .filter(transaction -> transaction.getTransaction_type().equalsIgnoreCase(transaction_type))
+                    .filter(transaction -> transaction.getTransactionType().equalsIgnoreCase(transaction_type))
                     .collect(Collectors.toList());
         }
 
         if ((start_date != null) && (end_date != null)) {
             transactions = transactions.stream()
-                    .filter(transaction -> ((!transaction.getTransaction_date().isBefore(start_date)) && (!transaction.getTransaction_date().isAfter(end_date))))
+                    .filter(transaction -> ((!transaction.getTransactionDate().isBefore(start_date)) && (!transaction.getTransactionDate().isAfter(end_date))))
                     .collect(Collectors.toList());
         }
 
         else if (start_date != null) {
             transactions = transactions.stream()
-                    .filter(transaction -> !transaction.getTransaction_date().isBefore(start_date))
+                    .filter(transaction -> !transaction.getTransactionDate().isBefore(start_date))
                     .collect(Collectors.toList());
         }
 
         else if (end_date != null) {
             transactions = transactions.stream()
-                    .filter(transaction -> !transaction.getTransaction_date().isAfter(end_date))
+                    .filter(transaction -> !transaction.getTransactionDate().isAfter(end_date))
                     .collect(Collectors.toList());
         }
 

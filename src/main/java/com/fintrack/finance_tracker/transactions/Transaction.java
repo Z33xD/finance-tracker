@@ -15,31 +15,39 @@ public class Transaction {
     @Column(name = "id", unique = true)
     private int id;
 
-    private int account_id;
+    @Column(name = "account_id")
+    private int accountId;
 
-    private int category_id;
+    @Column(name = "category_id")
+    private int categoryId;
 
+    @Column(name = "amount")
     private double amount;
 
-    private LocalDate transaction_date;
+    @Column(name = "transaction_date")
+    private LocalDate transactionDate;
 
+    @Column(name = "description")
     private String description;
 
-    private String transaction_type;
+    @Column(name = "transaction_type")
+    private String transactionType;
 
-    private int import_batch_id;
+    @Column(name = "import_batch_id")
+    private int importBatchId;
 
+    @Column(name = "datetime")
     private LocalDateTime datetime;
 
-    public Transaction(int id, int account_id, int category_id, double amount, LocalDate transaction_date, String description, String transaction_type, int import_batch_id, LocalDateTime datetime) {
+    public Transaction(int id, int accountId, int categoryId, double amount, LocalDate transactionDate, String description, String transactionType, int importBatchId, LocalDateTime datetime) {
         this.id = id;
-        this.account_id = account_id;
-        this.category_id = category_id;
+        this.accountId = accountId;
+        this.categoryId = categoryId;
         this.amount = amount;
-        this.transaction_date = transaction_date;
+        this.transactionDate = transactionDate;
         this.description = description;
-        this.transaction_type = transaction_type;
-        this.import_batch_id = import_batch_id;
+        this.transactionType = transactionType;
+        this.importBatchId = importBatchId;
         this.datetime = datetime;
     }
 
@@ -54,19 +62,19 @@ public class Transaction {
     }
 
     public int getAccount_id() {
-        return account_id;
+        return accountId;
     }
 
-    public void setAccount_id(int account_id) {
-        this.account_id = account_id;
+    public void setAccountId(int accountId) {
+        this.accountId = accountId;
     }
 
-    public int getCategory_id() {
-        return category_id;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory_id(int category_id) {
-        this.category_id = category_id;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public double getAmount() {
@@ -77,12 +85,12 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public LocalDate getTransaction_date() {
-        return transaction_date;
+    public LocalDate getTransactionDate() {
+        return transactionDate;
     }
 
-    public void setTransaction_date(LocalDate transaction_date) {
-        this.transaction_date = transaction_date;
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
     }
 
     public String getDescription() {
@@ -93,20 +101,20 @@ public class Transaction {
         this.description = description;
     }
 
-    public String getTransaction_type() {
-        return transaction_type;
+    public String getTransactionType() {
+        return transactionType;
     }
 
-    public void setTransaction_type(String transaction_type) {
-        this.transaction_type = transaction_type;
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
-    public int getImport_batch_id() {
-        return import_batch_id;
+    public int getImportBatchId() {
+        return importBatchId;
     }
 
-    public void setImport_batch_id(int import_batch_id) {
-        this.import_batch_id = import_batch_id;
+    public void setImportBatchId(int importBatchId) {
+        this.importBatchId = importBatchId;
     }
 
     public LocalDateTime getDatetime() {
