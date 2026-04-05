@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +18,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             int category_id,
             String transaction_type
     );
+    List<Transaction> findByAccountIdInAndTransactionDate(List<Integer> accountIds, LocalDate date);
+    List<Transaction> findByAccountIdIn(List<Integer> accountIds);
 }

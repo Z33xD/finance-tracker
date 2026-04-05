@@ -33,7 +33,7 @@ public class AccountController {
         User currentUser = getAuthenticatedUser();
         Account account = accountService.getAccountById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (account.getUser_id() != currentUser.getId()) {
+        if (account.getUserId() != currentUser.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -43,7 +43,7 @@ public class AccountController {
     @PostMapping
     public ResponseEntity<Account> addAccount(@RequestBody Account account) {
         User currentUser = getAuthenticatedUser();
-        account.setUser_id(currentUser.getId());
+        account.setUserId(currentUser.getId());
 
         Account createdAccount = accountService.addAccount(account);
         return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
@@ -55,11 +55,11 @@ public class AccountController {
 
         Account existing = accountService.getAccountById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (existing.getUser_id() != currentUser.getId()) {
+        if (existing.getUserId() != currentUser.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        account.setUser_id(currentUser.getId());
+        account.setUserId(currentUser.getId());
 
         Account updatedAccount = accountService.updateAccount(id, account);
         return ResponseEntity.ok(updatedAccount);
@@ -70,7 +70,7 @@ public class AccountController {
         User currentUser = getAuthenticatedUser();
         Account existing = accountService.getAccountById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        if (existing.getUser_id() != currentUser.getId()) {
+        if (existing.getUserId() != currentUser.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 

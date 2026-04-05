@@ -1,5 +1,7 @@
 package com.fintrack.finance_tracker.transactions;
 
+import com.fintrack.finance_tracker.accounts.Account;
+import com.fintrack.finance_tracker.accounts.AccountRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,10 +15,12 @@ import java.util.stream.Collectors;
 @Component
 public class TransactionService {
     private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
 
     @Autowired
-    public TransactionService(TransactionRepository transactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
+        this.accountRepository = accountRepository;
     }
 
     public List<Transaction> getTransactions() {
@@ -31,6 +35,27 @@ public class TransactionService {
         return transactionRepository.findAll().stream()
                 .filter(transaction -> (transaction.getTransactionDate().equals(searchKey)))
                 .collect(Collectors.toList());
+    }
+
+    public List<Transaction> getTransactionsForUser(int userId, LocalDate date) {
+        List<Account> accounts = accountRepository.findByUserId(userId);
+
+        List<Integer> accountIds = accounts.stream()
+                .map(Account::getId)
+                .toList();
+
+        if (date != null) {
+            return transactionRepository.findByAccountIdInAndTransactionDate(accountIds, date);
+        }
+
+        return transactionRepository.findByAccountIdIn(accountIds);
+    }
+
+    public boolean isTransactionOwnedByUser(int transactionId, int userId) {
+        Transaction tx = transactionRepository.findById(transactionId).orElseThrow();
+        Account account = accountRepository.findById(tx.getAccount_id()).orElseThrow();
+
+        return account.getUserId() != userId;
     }
 
     public Transaction addTransaction(Transaction transaction) {
@@ -75,8 +100,17 @@ public class TransactionService {
         return null;
     }
 
-    public List<Transaction> searchTransactions(Integer category_id, LocalDate start_date, LocalDate end_date, String transaction_type) {
+    public List<Transaction> searchTransactionsForUser(Integer userId, Integer category_id, LocalDate start_date, LocalDate end_date, String transaction_type) {
+        List<Integer> userAccountIds = accountRepository.findByUserId(userId)
+                .stream()
+                .map(Account::getId)
+                .toList();
+
         List<Transaction> transactions = transactionRepository.findAll();
+
+        transactions = transactions.stream()
+                .filter(transaction -> userAccountIds.contains(transaction.getAccount_id()))
+                .collect(Collectors.toList());
 
         if (category_id != null) {
             transactions = transactions.stream()
@@ -112,7 +146,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public void deleteUser(int id) {
+    public void deleteTransaction(int id) {
         transactionRepository.deleteById(id);
     }
 }
