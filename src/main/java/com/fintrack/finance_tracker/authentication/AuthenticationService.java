@@ -30,12 +30,35 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
+        Optional<User> existingUser = userRepository.findByEmail(input.getEmail());
+
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+
+            if (user.isEnabled()) {
+                throw new RuntimeException("Email already in use!");
+            }
+
+            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
+
+            userRepository.save(user);
+            sendVerificationEmail(user);
+
+            return user;
+        }
+
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
+
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
-        sendVerificationEmail(user);
-        return userRepository.save(user);
+
+        System.out.println("DB code: '" + user.getVerificationCode() + "'");
+
+        User savedUser = userRepository.save(user);
+        sendVerificationEmail(savedUser);
+        return savedUser;
     }
 
     public User authenticate(LoginUserDto input) {
@@ -56,27 +79,33 @@ public class AuthenticationService {
 
     public void verifyUser(VerifyUserDto input) {
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-
-            if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired!");
-            }
-
-            if (user.getVerificationCode().equals(input.getVerificationCode())) {
-                user.setEnabled(true);
-                user.setVerificationCode(null);
-                user.setVerificationExpiration(null);
-                userRepository.save(user);
-            }
-
-            else {
-                throw new RuntimeException("Invalid verification code!");
-            }
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found!");
         }
 
-        else {
-            throw new RuntimeException("User not found!");
+        User user = optionalUser.get();
+
+        String codeFromUser = input.getVerificationCode();
+        if (codeFromUser == null) {
+            throw new RuntimeException("Verification code cannot be null!");
+        }
+
+        String codeFromDB = user.getVerificationCode();
+        if (codeFromDB == null) {
+            throw new RuntimeException("User does not have a verification code!");
+        }
+
+        if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Verification code has expired!");
+        }
+
+        if (codeFromDB.trim().equals(codeFromUser.trim())) {
+            user.setEnabled(true);
+            user.setVerificationCode(null);
+            user.setVerificationExpiration(null);
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("Invalid verification code!");
         }
     }
 
@@ -89,8 +118,14 @@ public class AuthenticationService {
             if (user.isEnabled()) {
                 throw new RuntimeException("Account is already verified!");
             }
-            user.setVerificationCode(generateVerificationCode());
-            user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
+
+            if (user.getVerificationCode() == null ||
+                    user.getVerificationExpiration() == null ||
+                    user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
+                user.setVerificationCode(generateVerificationCode());
+                user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
+            }
+
             sendVerificationEmail(user);
             userRepository.save(user);
         }
