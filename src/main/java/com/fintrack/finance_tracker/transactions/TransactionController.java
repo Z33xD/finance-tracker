@@ -23,7 +23,7 @@ public class TransactionController {
     public List<Transaction> getTransactions(
             @RequestParam (required = false) Integer id,
             @RequestParam (required = false) LocalDate date
-            ) {
+    ) {
         if (id != null) {
             return transactionService.getTransactionById(id)
                     .map(List::of)
@@ -75,7 +75,7 @@ public class TransactionController {
             @RequestParam (required = false) LocalDate start_date,
             @RequestParam (required = false) LocalDate end_date,
             @RequestParam (required = false) String transaction_type
-            ) {
+    ) {
         return transactionService.searchTransactions(category_id, start_date, end_date, transaction_type);
     }
 }
