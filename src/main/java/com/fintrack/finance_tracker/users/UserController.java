@@ -49,6 +49,7 @@ public class UserController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
+    // Retrieve currently authenticated user's details
     @GetMapping("/me")
     public ResponseEntity<User> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -74,7 +75,26 @@ public class UserController {
         }
     }
 
-    // TODO: PUT /api/users/me (Update currently authenticated user's profile)
+    //  Update currently authenticated user's profile
+    @PutMapping("/me")
+    public ResponseEntity<User> updateCurrentUser(@RequestBody User updatedData) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        User currentUser = (User) authentication.getPrincipal();
+
+        assert currentUser != null;
+        User updatedUser = userService.updateUser(currentUser.getId(), updatedData);
+
+        if (updatedUser != null) {
+            return ResponseEntity.ok(updatedUser);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable int id) {
@@ -82,5 +102,19 @@ public class UserController {
         return new ResponseEntity<>("User deleted successfully!", HttpStatus.OK);
     }
 
-    // TODO: DELETE /api/users/me (Delete currently authenticated user's account)
+    // Delete currently authenticated user's account
+    @DeleteMapping("/me")
+    public ResponseEntity<String> deleteCurrentUser() {
+        Authentication authentication = SecurityContextHolder.createEmptyContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        User currentUser = (User) authentication.getPrincipal();
+        assert currentUser != null;
+        userService.deleteUser(currentUser.getId());
+
+        return ResponseEntity.ok("Your account has been deleted successfully!");
+    }
 }
