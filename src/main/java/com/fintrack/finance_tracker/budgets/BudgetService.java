@@ -30,6 +30,18 @@ public class BudgetService {
                 .collect(Collectors.toList());
     }
 
+    public List<Budget> getBudgetsByUserIdAndMonthAndYear(int userId, int month, int year) {
+        return budgetRepository.findAll().stream()
+                .filter(budget -> (budget.getUser_id() == userId && budget.getMonth() == month && budget.getYear() == year))
+                .collect(Collectors.toList());
+    }
+
+    public List<Budget> getBudgetsByUserId(int userId) {
+        return budgetRepository.findAll().stream()
+                .filter(budget -> (budget.getUser_id() == userId))
+                .collect(Collectors.toList());
+    }
+
     public Budget addBudget(Budget budget) {
         budgetRepository.save(budget);
         if (budget.getCreated_at() == null) {
