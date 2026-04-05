@@ -14,7 +14,7 @@ public class Account {
     @Column (name = "id", unique = true)
     private int id;
 
-    private int user_id;
+    private int userId;
 
     private String account_name;
 
@@ -26,9 +26,9 @@ public class Account {
 
     private LocalDateTime created_at;
 
-    public Account(int id, int user_id, String account_name, String account_type, String currency, double initial_balance, LocalDateTime created_at) {
+    public Account(int id, int userId, String account_name, String account_type, String currency, double initial_balance, LocalDateTime created_at) {
         this.id = id;
-        this.user_id = user_id;
+        this.userId = userId;
         this.account_name = account_name;
         this.account_type = account_type;
         this.currency = currency;
@@ -46,12 +46,12 @@ public class Account {
         this.id = id;
     }
 
-    public int getUser_id() {
-        return user_id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUser_id(int user_id) {
-        this.user_id = user_id;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getAccount_name() {

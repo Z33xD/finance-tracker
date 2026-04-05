@@ -28,7 +28,7 @@ public class AccountService {
 
     public List<Account> getAccountsByUserId(int searchKey) {
         return accountRepository.findAll().stream()
-                .filter(account -> (account.getUser_id() == searchKey))
+                .filter(account -> (account.getUserId() == searchKey))
                 .collect(Collectors.toList());
     }
 
