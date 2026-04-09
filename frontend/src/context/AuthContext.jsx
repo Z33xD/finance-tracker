@@ -7,20 +7,26 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem('token'));
 
-    const login = async (username, password) => {
-        const res = await api.post('/api/auth/login', { username, password });
+    const signup = async (userData) => {
+        // Step 1: Register → triggers email
+        await api.post('/auth/signup', userData);
+        return true; // success, now ask for verification code
+    };
 
-        const receivedToken = res.data.token;           // ← exactly matches your response
+    const verifyEmail = async (email, verificationCode) => {
+        await api.post('/auth/verify', { email, verificationCode });
+    };
+
+    const login = async (email, password) => {
+        const res = await api.post('/auth/login', { email, password });
+
+        const receivedToken = res.data.token;
         localStorage.setItem('token', receivedToken);
         setToken(receivedToken);
 
-        // fetch current user
+        // Fetch current user
         const userRes = await api.get('/api/users/me');
         setUser(userRes.data);
-    };
-
-    const signup = async (userData) => {
-        await api.post('/api/users/', userData);
     };
 
     const logout = () => {
@@ -30,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, signup, logout }}>
+        <AuthContext.Provider value={{ user, token, signup, verifyEmail, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
