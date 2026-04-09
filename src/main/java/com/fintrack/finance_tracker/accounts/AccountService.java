@@ -34,16 +34,16 @@ public class AccountService {
 
     public List<Account> getAccountsByAccountType(String searchText) {
         return accountRepository.findAll().stream()
-                .filter(account -> account.getAccount_type().toLowerCase().contains(searchText.toLowerCase()))
+                .filter(account -> account.getAccountType().toLowerCase().contains(searchText.toLowerCase()))
                 .collect(Collectors.toList());
     }
 
     public Account addAccount(Account account) {
-        accountRepository.save(account);
-        if (account.getCreated_at() == null) {
-            account.setCreated_at(LocalDateTime.now());
+        if (account.getCreatedAt() == null) {
+            account.setCreatedAt(LocalDateTime.now());
         }
-        return account;
+        System.out.println(account.getAccountName());
+        return accountRepository.save(account);
     }
 
     public Account updateAccount(int id, Account updatedAccount) {
@@ -52,16 +52,16 @@ public class AccountService {
         if (existingAccount.isPresent()) {
             Account accountToUpdate = existingAccount.get();
 
-            if (updatedAccount.getAccount_name() != null) {
-                accountToUpdate.setAccount_name(updatedAccount.getAccount_name());
+            if (updatedAccount.getAccountName() != null) {
+                accountToUpdate.setAccountName(updatedAccount.getAccountName());
             }
-            if (updatedAccount.getAccount_type() != null) {
-                accountToUpdate.setAccount_type(updatedAccount.getAccount_type());
+            if (updatedAccount.getAccountType() != null) {
+                accountToUpdate.setAccountType(updatedAccount.getAccountType());
             }
             if (updatedAccount.getCurrency() != null) {
                 accountToUpdate.setCurrency(updatedAccount.getCurrency());
             }
-            accountToUpdate.setInitial_balance(updatedAccount.getInitial_balance());
+            accountToUpdate.setInitialBalance(updatedAccount.getInitialBalance());
 
             accountRepository.save(accountToUpdate);
             return accountToUpdate;
