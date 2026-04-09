@@ -27,12 +27,17 @@ export default function Profile() {
         <div>
             <h1>Profile</h1>
             <div className="card">
+                {/*
                 <form onSubmit={handleUpdate}>
                     <input value={form.username || ''} onChange={e => setForm({...form, username: e.target.value})} placeholder="Username" />
                     <input value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} placeholder="Email" />
                     <button type="submit" className="primary">Update Profile</button>
                 </form>
+                */}
+                Note: Deleting your account is permanent. This action cannot be reversed.
+                <div>
                 <button className="danger" style={{ marginTop: '20px' }} onClick={handleDelete}>Delete Account</button>
+                </div>
             </div>
         </div>
     );
