@@ -1,9 +1,7 @@
 package com.fintrack.finance_tracker.accounts;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -12,28 +10,39 @@ import java.time.LocalDateTime;
 public class Account {
     @Id
     @Column (name = "id", unique = true)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
+    @Column(name = "user_id")
+    @JsonProperty("user_id")
     private int userId;
 
-    private String account_name;
+    @Column(name = "account_name")
+    @JsonProperty("account_name")
+    private String accountName;
 
-    private String account_type;
+    @Column(name = "account_type")
+    @JsonProperty("account_type")
+    private String accountType;
 
     private String currency;
 
-    private double initial_balance;
+    @Column(name = "initial_balance")
+    @JsonProperty("initial_balance")
+    private double initialBalance;
 
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
 
-    public Account(int id, int userId, String account_name, String account_type, String currency, double initial_balance, LocalDateTime created_at) {
+    public Account(int id, int userId, String accountName, String accountType, String currency, double initialBalance, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
-        this.account_name = account_name;
-        this.account_type = account_type;
+        this.accountName = accountName;
+        this.accountType = accountType;
         this.currency = currency;
-        this.initial_balance = initial_balance;
-        this.created_at = created_at;
+        this.initialBalance = initialBalance;
+        this.createdAt = createdAt;
     }
 
     public Account() {}
@@ -54,20 +63,20 @@ public class Account {
         this.userId = userId;
     }
 
-    public String getAccount_name() {
-        return account_name;
+    public String getAccountName() {
+        return accountName;
     }
 
-    public void setAccount_name(String account_name) {
-        this.account_name = account_name;
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
-    public String getAccount_type() {
-        return account_type;
+    public String getAccountType() {
+        return accountType;
     }
 
-    public void setAccount_type(String account_type) {
-        this.account_type = account_type;
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
     }
 
     public String getCurrency() {
@@ -78,19 +87,19 @@ public class Account {
         this.currency = currency;
     }
 
-    public double getInitial_balance() {
-        return initial_balance;
+    public double getInitialBalance() {
+        return initialBalance;
     }
 
-    public void setInitial_balance(double initial_balance) {
-        this.initial_balance = initial_balance;
+    public void setInitialBalance(double initialBalance) {
+        this.initialBalance = initialBalance;
     }
 
-    public LocalDateTime getCreated_at() {
-        return created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
