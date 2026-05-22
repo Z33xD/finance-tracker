@@ -1,111 +1,113 @@
-# Finance Tracker Backend
+# Finance Tracker
 
-Spring Boot REST API for managing financial data
-
----
-
-## Overview 
-
-This is a personal project made by [me](https://github.com/Z33xD/). It is a Spring Boot based backend application, that provides RESTFul APIs for managing financial data, including `users`, `accounts`, `transactions`, `categories`, `budgets` and `exchange_rates`.  This application is built on top of a pre-designed relational database made with PostgreSQL.
-
-This project was built mainly to get hands-on experience with a database management system like Postgres and  Spring Boot to build production-style backend APIs.
+A full-stack, secure personal finance management application featuring production-grade authentication, real-time currency conversions, and automated bulk data processing.
 
 ---
 
-## Scope
+## Overview
 
-This application can:
-* Providing CRUD functionalities over the finance-tracker database.
-* Validating and persisting financial data
-* Handling CSV-based bulk transactional imports
-* Performing currency-conversion using an external exchange-rate data
-
-What's out of scope for this project (for now) is:
-* User-facing front-end
-* Authentication beyond basic credential handling
-* Financial analytics, forecasting or analytics
+This is a Spring Boot based application that [I](https://www.github.com/Z33xD) made. It began as a hands-on backend exploration of Spring Boot and PostgreSQL, and is evolving into a full-stack financial utility. This app exposes robust RESTful APIs secured via stateless token authentication, and features a frontend interface to help users track budgets, manage accounts, and parse transaction histories.
 
 ---
 
-## Features
+## Key Features
 
-* CRUD operations for `users`, `accounts`, `categories`, `transactions`, and `budgets`
-* CSV upload endpoints for bulk `transaction` imports, with duplicate detection and `import_batch` tracking
-* Currency conversion using [ExchangeRate-API](https://www.exchangerate-api.com/)
-* RESTFul API design with clear resource boundaries
-* Validation and basic error-handling for incoming requests
+### Secure Authentication & User Management
+- **JWT Authentication:** Stateless, token-based user sign-up and login architecture utilising Spring Security and JSON Web Tokens (JWT).
+- **Email Verification:** Security validation workflow during sign-up to verify user authenticity before unlocking account scopes.
+- **Contextual Security:** All financial domain controllers (/accounts, /transactions, /budgets) are guarded and automatically scoped to the currently authenticated user.
+
+### Financial Domain Engine
+- **Multi-Asset Tracking:** Complete CRUD management for user accounts, customisable expense/income categories, transactions, and localised budgets.
+- **Smart Budgeting:** Set up thresholds per category and evaluate limits against live transaction metrics.
+
+### Bulk Processing & Extensibility
+
+- **CSV Bulk Imports:** High-performance transactional ingestion handling bulk data with custom duplicate detection, historical logging, and `import_batch` error metrics tracking.
+- **Live Exchange Rates:** Dynamically handles currency conversions across assets using integration hooks with the external [ExchangeRate-API](https://www.exchangerate-api.com/).
+
+---
+## Architecture & Tech Stack
+
+### Backend Architecture
+- **Core:** Java 21 / Spring Boot 3.x
+- **Security:** Spring Security & JWT (JSON Web Tokens)
+- **Database & Persistence:** PostgreSQL / Spring Data JPA (Hibernate)
+- **Build Tool:** Maven
+
+### Frontend Client
+- React
+- Vite
+- CSS (Vanilla)
 
 ---
 
-## Tech Stack
-* Java 21
-* Spring Boot
-* PostgreSQL
-* ExchangeRate-API
-* Maven
+## Core System Design
+
+### Database Layout
+The underlying transactional model relies on a tightly constrained relational schema optimising indexing and data isolation for user records. View the full architectural design, entity relationships, and database constraints in the [design documentation](https://github.com/Z33xD/finance-tracker/blob/main/project/DESIGN.md).
+
+### Protected API Architecture
+
+All core REST resources expect a valid JWT passed via the Authorisation: Bearer header, filtering resources inherently by the active token context:
+
+| **Endpoint**    | **HTTP Method**           | **Scope**                                                  |
+| --------------- | ------------------------- | ---------------------------------------------------------- |
+| /auth/register  | POST                      | Public: Registers new user + triggers verification email   |
+| /auth/login     | POST                      | Public: Authenticates identity and issues JWT access token |
+| /accounts       | GET / POST / PUT / DELETE | Secured: User-scoped financial assets                      |
+| /transactions   | GET / POST / DELETE       | Secured: Financial ledger management                       |
+| /categories     | GET / POST                | Secured: Custom categorisations                            |
+| /budgets        | GET / POST / PUT          | Secured: Spending caps and allocations                     |
+| /import-batches | GET / POST                | Secured: Multi-line CSV parsing and logs                   |
 
 ---
 
-## Database Design
+## Configuration & Environment Variables
 
-The full database design, including:
-* Entity definitions
-* Relationships
-* Constraints and indexes
-* Design decisions and limitations
-
-can be found in [this document](./project/DESIGN.md)
-
----
-
-## API Overview
-
-The application provides RESTFul endpoints for the following resources:
-* `/users`
-* `/accounts`
-* `/categories`
-* `/transactions`
-* `/budgets`
-* `/import-batches`
-* `/exchange-rates`
-
-All endpoints accept and return JSON.
-
----
-
-## CSV Import
-This application has an endpoint to upload CSV files containing transactions-related data. Its key behaviours are:
-* Transactions are processed in an import batch
-* A record of total, successful and failed imports are kept per batch
-* Duplicate transactions are skipped and counted as a failed transaction
-* Errors during processing are captured per batch
-
----
-
-## Configuration and Setup
-
-The application requires the following environment variables
-- Database connection credentials (`SPRING_DATASOURCE_PASSWORD`, `SPRING_DATASOURCE_USERNAME`)
-- ExchangeRate API Key (`EXCHANGERATE_API_KEY`)
-
----
-
-## Running the Application
-
-1. Clone the repository
-2. Configure the database and the above mentioned API Keys
-3. Run the application with
-```bash
-  mvn spring-boot:run
+To run this application locally, you must provide the environment configurations for database access, the mail server (for sign-up verification), and the exchange rate client.
+```
+JWT_SECRET_KEY=your_jwt_secret_key
+SPRING_DATASOURCE_USERNAME=username
+SPRING_DATASOURCE_PASSWORD=password  
+EXCHANGERATE_API_KEY=your_exchangerate_api_key
+SUPPORT_EMAIL=support@email.com
+APP_PASSWORD=apppassword
 ```
 
-The API will be available at http://localhost:8080
+---
+
+## Getting Started
+
+### 1. Clone the Project
+```
+git clone https://github.com/Z33xD/finance-tracker.git
+cd finance-tracker
+```
+
+### 2. Run the Backend Infrastructure
+Ensure your PostgreSQL instance is running and your environment variables are initialised.
+```
+mvn spring-boot:run
+```
+The API engine, defaults to: http://localhost:8080
+
+### 3. Run the Frontend Client
+```
+cd frontend
+npm install
+npm run dev
+```
+The frontend, by default, runs on: http://localhost:5173/
 
 ---
 
-## Limitations and Future Work
+## Active Development
 
-- No support for recurring transactions
-- No real-time exchange rate updates
-- Limited authentication and authorisation
-- No audit logging for data changes
+- [ ] Finalising token authentication filters and routing controller debugging.
+- [ ] Enhancing the user interface.
+- [ ] Implementing automated recurring transaction schedulers.
+- [ ] Enhancing the data visualisation layer for predictive budgeting analytics.
+- [ ] Dockerising the application
+
+---
