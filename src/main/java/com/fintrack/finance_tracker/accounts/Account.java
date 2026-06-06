@@ -11,11 +11,11 @@ public class Account {
     @Id
     @Column (name = "id", unique = true)
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     @Column(name = "user_id")
     @JsonProperty("user_id")
-    private int userId;
+    private Integer userId;
 
     @Column(name = "account_name")
     @JsonProperty("account_name")
@@ -35,7 +35,7 @@ public class Account {
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
-    public Account(int id, int userId, String accountName, String accountType, String currency, double initialBalance, LocalDateTime createdAt) {
+    public Account(Integer id, Integer userId, String accountName, String accountType, String currency, double initialBalance, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.accountName = accountName;
