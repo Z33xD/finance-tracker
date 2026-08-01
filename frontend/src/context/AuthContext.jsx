@@ -17,8 +17,8 @@ export const AuthProvider = ({ children }) => {
         await api.post('/auth/verify', { email, verificationCode });
     };
 
-    const login = async (email, password) => {
-        const res = await api.post('/auth/login', { email, password });
+    const login = async (username, password) => {
+        const res = await api.post('/auth/login', { username, password });
 
         const receivedToken = res.data.token;
         localStorage.setItem('token', receivedToken);
