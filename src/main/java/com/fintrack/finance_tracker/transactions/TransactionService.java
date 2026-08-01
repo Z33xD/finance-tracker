@@ -4,11 +4,14 @@ import com.fintrack.finance_tracker.accounts.Account;
 import com.fintrack.finance_tracker.accounts.AccountRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -52,10 +55,19 @@ public class TransactionService {
     }
 
     public boolean isTransactionOwnedByUser(int transactionId, int userId) {
-        Transaction tx = transactionRepository.findById(transactionId).orElseThrow();
-        Account account = accountRepository.findById(tx.getAccount_id()).orElseThrow();
+        Transaction tx = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaction not found"));
+        Account account = accountRepository.findById(tx.getAccount_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
 
         return account.getUserId() != userId;
+    }
+
+    public boolean isAccountOwnedByUser(int accountId, int userId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+
+        return account.getUserId() == userId;
     }
 
     public Transaction addTransaction(Transaction transaction) {
@@ -114,7 +126,7 @@ public class TransactionService {
 
         if (category_id != null) {
             transactions = transactions.stream()
-                    .filter(transaction -> (transaction.getCategoryId() == category_id))
+                    .filter(transaction -> Objects.equals(transaction.getCategoryId(), category_id))
                     .collect(Collectors.toList());
         }
 

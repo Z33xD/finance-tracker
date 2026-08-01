@@ -12,7 +12,7 @@ export default function Transactions() {
         amount: 0,
         transactionType: 'EXPENSE',
         account_id: '',           // ← important: linked to account
-        date: new Date().toISOString().split('T')[0]
+        transactionDate: new Date().toISOString().split('T')[0]
     });
 
     // Fetch both accounts and transactions
@@ -66,7 +66,7 @@ export default function Transactions() {
                 amount: 0,
                 transactionType: 'EXPENSE',
                 account_id: '',
-                date: new Date().toISOString().split('T')[0]
+                transactionDate: new Date().toISOString().split('T')[0]
             });
 
             fetchData(); // refresh both lists
@@ -142,8 +142,8 @@ export default function Transactions() {
 
                         <input
                             type="date"
-                            value={form.date}
-                            onChange={e => setForm({...form, date: e.target.value})}
+                            value={form.transactionDate}
+                            onChange={e => setForm({...form, transactionDate: e.target.value})}
                         />
 
                         <button type="submit" className="primary">Add Transaction</button>
