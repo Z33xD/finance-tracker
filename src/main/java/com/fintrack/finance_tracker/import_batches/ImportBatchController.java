@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/import-batches")
+@RequestMapping(path = "/api/import-batches/")
 public class ImportBatchController {
     private final ImportBatchService importBatchService;
 
