@@ -12,12 +12,14 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Budgets() {
     const [budgets, setBudgets] = useState([]);
-    const [transactions, setTransactions] = useState([]); // to calculate actual spending
+    const [spending, setSpending] = useState({}); // { [budgetId]: actualSpent }
+    const [spendingLoading, setSpendingLoading] = useState(false);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const [form, setForm] = useState({
-        category: '',
+        category_id: '',
         amount: 0,
         month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
@@ -35,17 +37,43 @@ export default function Budgets() {
             else if (budgetRes.data) budgetList = [budgetRes.data];
             setBudgets(budgetList);
 
-            // Fetch transactions to calculate actual spending (for this month)
-            const txRes = await api.get('/api/transactions/');
-            let txList = [];
-            if (Array.isArray(txRes.data)) txList = txRes.data;
-            else if (txRes.data?.content) txList = txRes.data.content;
-            setTransactions(txList);
+            // Fetch categories for the dropdown
+            const catRes = await api.get('/api/categories/');
+            let categoryList = [];
+            if (Array.isArray(catRes.data)) categoryList = catRes.data;
+            else if (catRes.data?.content && Array.isArray(catRes.data.content)) categoryList = catRes.data.content;
+            else if (catRes.data) categoryList = [catRes.data];
+            setCategories(categoryList);
+
+            // Fetch actual spending per budget (for the budget's own month/year) via the search endpoint
+            setSpendingLoading(true);
+            const spendingMap = {};
+            await Promise.all(budgetList.map(async (budget) => {
+                if (!budget.category_id) return;
+
+                const monthPadded = String(budget.month).padStart(2, '0');
+                const lastDay = new Date(budget.year, budget.month, 0).getDate();
+                const res = await api.get('/api/transactions/search', {
+                    params: {
+                        category_id: budget.category_id,
+                        start_date: `${budget.year}-${monthPadded}-01`,
+                        end_date: `${budget.year}-${monthPadded}-${lastDay}`,
+                        transaction_type: 'EXPENSE',
+                    },
+                });
+
+                let txList = [];
+                if (Array.isArray(res.data)) txList = res.data;
+                else if (res.data?.content && Array.isArray(res.data.content)) txList = res.data.content;
+                spendingMap[budget.id] = txList.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+            }));
+            setSpending(spendingMap);
         } catch (err) {
             console.error(err);
             setError("Failed to load budgets");
         } finally {
             setLoading(false);
+            setSpendingLoading(false);
         }
     };
 
@@ -55,15 +83,18 @@ export default function Budgets() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.category || form.amount <= 0) {
-            alert("Please enter a valid category and amount");
+        if (!form.category_id || form.amount <= 0) {
+            alert("Please select a valid category and enter an amount");
             return;
         }
 
         try {
-            await api.post('/api/budgets/', form);
+            await api.post('/api/budgets/', {
+                ...form,
+                category_id: parseInt(form.category_id),
+            });
             setForm({
-                category: '',
+                category_id: '',
                 amount: 0,
                 month: new Date().getMonth() + 1,
                 year: new Date().getFullYear(),
@@ -75,24 +106,16 @@ export default function Budgets() {
         }
     };
 
-    // Calculate actual spent per category for current month
-    const getActualSpent = (category) => {
-        const currentMonth = new Date().getMonth() + 1;
-        const currentYear = new Date().getFullYear();
-
-        return transactions
-            .filter(tx =>
-                tx.transactionType === 'EXPENSE' &&
-                tx.category === category && // assuming your Transaction has a 'category' field (string or id)
-                new Date(tx.date).getMonth() + 1 === currentMonth &&
-                new Date(tx.date).getFullYear() === currentYear
-            )
-            .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+    // Category name lookup for the budget list / chart
+    const getCategoryName = (categoryId) => {
+        if (!categoryId) return null;
+        const cat = categories.find(c => String(c.id) === String(categoryId));
+        return cat ? cat.name : null;
     };
 
     // Prepare data for Pie Chart
     const chartData = {
-        labels: budgets.map(b => b.category || 'Unknown'),
+        labels: budgets.map(b => getCategoryName(b.category_id) || b.category || 'Unknown'),
         datasets: [{
             data: budgets.map(b => b.amount || 0),
             backgroundColor: [
@@ -122,12 +145,18 @@ export default function Budgets() {
             <div className="card">
                 <h2>Set New Budget</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '12px', maxWidth: '500px' }}>
-                    <input
-                        placeholder="Category (e.g. Food, Transport, Rent)"
-                        value={form.category}
-                        onChange={e => setForm({ ...form, category: e.target.value })}
+                    <select
+                        value={form.category_id}
+                        onChange={e => setForm({ ...form, category_id: e.target.value })}
                         required
-                    />
+                    >
+                        <option value="">Select Category</option>
+                        {categories.map(cat => (
+                            <option key={cat.id} value={cat.id}>
+                                {cat.icon ? `${cat.icon} ` : ''}{cat.name}{cat.type ? ` (${cat.type})` : ''}
+                            </option>
+                        ))}
+                    </select>
                     <input
                         type="number"
                         step="0.01"
@@ -165,15 +194,20 @@ export default function Budgets() {
                     <p>No budgets set yet. Create one above.</p>
                 ) : (
                     <div>
+                        {spendingLoading && (
+                            <small style={{ color: '#64748b', display: 'block', marginBottom: '10px' }}>
+                                Calculating actual spending...
+                            </small>
+                        )}
                         {budgets.map((budget, index) => {
-                            const actual = getActualSpent(budget.category);
+                            const actual = spending[budget.id] || 0;
                             const percentage = budget.amount > 0 ? Math.min((actual / budget.amount) * 100, 100) : 0;
                             const isOver = actual > budget.amount;
 
                             return (
                                 <div key={budget.id || index} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <strong>{budget.category}</strong>
+                                        <strong>{getCategoryName(budget.category_id) || budget.category || `Category #${budget.category_id}`}</strong>
                                         <span>
                       ₹{actual.toFixed(2)} / ₹{budget.amount.toFixed(2)}
                     </span>
