@@ -47,7 +47,7 @@ public class TransactionController {
     public ResponseEntity<Transaction> addTransaction(@RequestBody Transaction transaction) {
         User currentUser = getAuthenticatedUser();
 
-        if (transactionService.isTransactionOwnedByUser(transaction.getAccount_id(), currentUser.getId())) {
+        if (!transactionService.isAccountOwnedByUser(transaction.getAccount_id(), currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -63,7 +63,7 @@ public class TransactionController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
-        if (transactionService.isTransactionOwnedByUser(transaction.getAccount_id(), currentUser.getId())) {
+        if (!transactionService.isAccountOwnedByUser(transaction.getAccount_id(), currentUser.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
