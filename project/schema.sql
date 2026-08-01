@@ -28,7 +28,7 @@ CREATE TABLE "categories" (
     "user_id" INT REFERENCES "users"("id") ON DELETE CASCADE,
     "name" VARCHAR(16) NOT NULL,
     "type" VARCHAR(16), -- income/expense, for example
-    "icon" CHAR(1),
+    "icon" VARCHAR(255), -- emoji icons can be multi-codepoint / multi-byte (UTF-8)
     "colour" VARCHAR(7), -- to be stored as hex-code
     PRIMARY KEY ("id")
 );

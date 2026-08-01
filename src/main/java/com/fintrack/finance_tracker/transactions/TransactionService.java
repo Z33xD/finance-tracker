@@ -70,22 +70,28 @@ public class TransactionService {
         return account.getUserId() == userId;
     }
 
+    @Transactional
     public Transaction addTransaction(Transaction transaction) {
-        transactionRepository.save(transaction);
         if (transaction.getDatetime() == null) {
             transaction.setDatetime(LocalDateTime.now());
         }
         if (transaction.getTransactionDate() == null) {
             transaction.setTransactionDate(LocalDate.now());
         }
+        transactionRepository.save(transaction);
+        applyBalanceChange(transaction.getAccount_id(), transaction.getAmount(), transaction.getTransactionType(), true);
         return transaction;
     }
 
+    @Transactional
     public Transaction updateTransaction(int id, Transaction updatedTransaction) {
         Optional<Transaction> existingTransaction = transactionRepository.findById(id);
 
         if (existingTransaction.isPresent()) {
             Transaction transactionToUpdate = existingTransaction.get();
+
+            applyBalanceChange(transactionToUpdate.getAccount_id(), transactionToUpdate.getAmount(), transactionToUpdate.getTransactionType(), false);
+
             transactionToUpdate.setAccountId(updatedTransaction.getAccount_id());
 
             transactionToUpdate.setCategoryId(updatedTransaction.getCategoryId());
@@ -107,6 +113,7 @@ public class TransactionService {
             transactionToUpdate.setImportBatchId(updatedTransaction.getImportBatchId());
 
             transactionRepository.save(transactionToUpdate);
+            applyBalanceChange(transactionToUpdate.getAccount_id(), transactionToUpdate.getAmount(), transactionToUpdate.getTransactionType(), true);
             return transactionToUpdate;
         }
         return null;
@@ -159,6 +166,29 @@ public class TransactionService {
 
     @Transactional
     public void deleteTransaction(int id) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaction not found"));
+
+        applyBalanceChange(transaction.getAccount_id(), transaction.getAmount(), transaction.getTransactionType(), false);
         transactionRepository.deleteById(id);
+    }
+
+    private void applyBalanceChange(int accountId, double amount, String transactionType, boolean isAddition) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+
+        double delta = isIncome(transactionType) ? amount : -amount;
+        if (!isAddition) {
+            delta = -delta;
+        }
+
+        double currentBalance = (account.getBalance() == null) ? account.getInitialBalance() : account.getBalance();
+        account.setBalance(currentBalance + delta);
+        accountRepository.save(account);
+    }
+
+    private boolean isIncome(String transactionType) {
+        return transactionType != null
+                && (transactionType.equalsIgnoreCase("INCOME") || transactionType.equalsIgnoreCase("CREDIT"));
     }
 }
