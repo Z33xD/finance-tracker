@@ -16,6 +16,7 @@ export default function Navbar() {
                 <Link to="/" style={linkStyle}>Home</Link>
                 <Link to="/accounts" style={linkStyle}>Accounts</Link>
                 <Link to="/transactions" style={linkStyle}>Transactions</Link>
+                <Link to="/categories" style={linkStyle}>Categories</Link>
                 <Link to="/budgets" style={linkStyle}>Budgets</Link>
                 <Link to="/profile" style={linkStyle}>Profile</Link>
             </div>

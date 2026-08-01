@@ -21,6 +21,12 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    public List<Category> getCategoriesByUserId(int userId) {
+        return categoryRepository.findAll().stream()
+                .filter(category -> category.getUser_id() == userId)
+                .collect(Collectors.toList());
+    }
+
     public Optional<Category> getCategoryById(int searchKey) {
         return categoryRepository.findById(searchKey);
     }

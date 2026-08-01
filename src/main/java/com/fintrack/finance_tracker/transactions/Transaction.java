@@ -24,6 +24,7 @@ public class Transaction {
     @Column(name = "account_id")
     private int accountId;
 
+    @JsonProperty("category_id")
     @Column(name = "category_id")
     private Integer categoryId;
 

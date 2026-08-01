@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import Home from './pages/Home';
 import Accounts from './pages/Accounts';
 import Transactions from './pages/Transactions';
+import Categories from './pages/Categories';
 import Budgets from './pages/Budgets';
 import Profile from './pages/Profile';
 
@@ -29,6 +30,7 @@ function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/accounts" element={<Accounts />} />
                         <Route path="/transactions" element={<Transactions />} />
+                        <Route path="/categories" element={<Categories />} />
                         <Route path="/budgets" element={<Budgets />} />
                         <Route path="/profile" element={<Profile />} />
                       </Routes>

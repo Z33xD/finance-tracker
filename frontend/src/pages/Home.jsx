@@ -14,9 +14,21 @@ export default function Home() {
             setLoading(true);
             setError(null);
             try {
-                const txRes = await api.get('/api/transactions/');
+                const [accRes, txRes] = await Promise.all([
+                    api.get('/api/accounts/'),
+                    api.get('/api/transactions/')
+                ]);
 
-                // ← SAFE HANDLING: make sure we have an array
+                // ← SAFE HANDLING: make sure we have arrays
+                let accounts = [];
+                if (Array.isArray(accRes.data)) {
+                    accounts = accRes.data;
+                } else if (accRes.data?.content && Array.isArray(accRes.data.content)) {
+                    accounts = accRes.data.content;   // common paginated response
+                } else if (accRes.data) {
+                    accounts = [accRes.data];         // single object fallback
+                }
+
                 let transactions = [];
                 if (Array.isArray(txRes.data)) {
                     transactions = txRes.data;
@@ -28,17 +40,15 @@ export default function Home() {
 
                 setRecentTx(transactions.slice(0, 5));
 
-                // Calculate balance safely
-                const total = transactions.reduce((sum, t) => {
-                    if (!t || typeof t.amount !== 'number') return sum;
-                    return t.transactionType === 'INCOME' || t.transactionType === 'CREDIT'
-                        ? sum + t.amount
-                        : sum - t.amount;
+                // Sum all account balances
+                const total = accounts.reduce((sum, acc) => {
+                    if (!acc) return sum;
+                    return sum + Number(acc.balance ?? acc.initial_balance ?? 0);
                 }, 0);
 
                 setBalance(total);
             } catch (err) {
-                console.error("Failed to fetch transactions:", err);
+                console.error("Failed to fetch accounts:", err);
                 setError("Could not load dashboard data. Please try refreshing.");
             } finally {
                 setLoading(false);

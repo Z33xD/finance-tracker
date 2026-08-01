@@ -4,6 +4,7 @@ import api from '../services/api';
 export default function Transactions() {
     const [transactions, setTransactions] = useState([]);
     const [accounts, setAccounts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -12,10 +13,11 @@ export default function Transactions() {
         amount: 0,
         transactionType: 'EXPENSE',
         account_id: '',           // ← important: linked to account
+        category_id: '',          // ← optional: linked to a category
         transactionDate: new Date().toISOString().split('T')[0]
     });
 
-    // Fetch both accounts and transactions
+    // Fetch accounts, categories and transactions
     const fetchData = async () => {
         setLoading(true);
         setError(null);
@@ -27,6 +29,14 @@ export default function Transactions() {
             else if (accRes.data?.content && Array.isArray(accRes.data.content)) accountList = accRes.data.content;
             else if (accRes.data) accountList = [accRes.data];
             setAccounts(accountList);
+
+            // Fetch categories for the dropdown
+            const catRes = await api.get('/api/categories/');
+            let categoryList = [];
+            if (Array.isArray(catRes.data)) categoryList = catRes.data;
+            else if (catRes.data?.content && Array.isArray(catRes.data.content)) categoryList = catRes.data.content;
+            else if (catRes.data) categoryList = [catRes.data];
+            setCategories(categoryList);
 
             // Fetch transactions
             const txRes = await api.get('/api/transactions/');
@@ -43,6 +53,23 @@ export default function Transactions() {
         }
     };
 
+    // Category name lookup for the transactions table
+    const getCategoryName = (categoryId) => {
+        if (!categoryId) return null;
+        const cat = categories.find(c => String(c.id) === String(categoryId));
+        return cat ? cat.name : null;
+    };
+
+    // Categories matching the selected transaction type (fallback to all)
+    const filteredCategories = (() => {
+        const matches = categories.filter(c => {
+            if (!c.type) return true;
+            const type = c.type.toLowerCase();
+            return form.transactionType === 'INCOME' ? type === 'income' : type === 'expense';
+        });
+        return matches.length > 0 ? matches : categories;
+    })();
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -57,7 +84,8 @@ export default function Transactions() {
         try {
             await api.post('/api/transactions/', {
                 ...form,
-                account_id: parseInt(form.account_id)   // ensure it's a number if your backend expects int
+                account_id: parseInt(form.account_id),   // ensure it's a number if your backend expects int
+                category_id: form.category_id ? parseInt(form.category_id) : null
             });
 
             // Reset form
@@ -66,6 +94,7 @@ export default function Transactions() {
                 amount: 0,
                 transactionType: 'EXPENSE',
                 account_id: '',
+                category_id: '',
                 transactionDate: new Date().toISOString().split('T')[0]
             });
 
@@ -111,7 +140,7 @@ export default function Transactions() {
                             <option value="">Select Account</option>
                             {accounts.map(acc => (
                                 <option key={acc.id} value={acc.id}>
-                                    {acc.account_name} (₹{Number(acc.initial_balance || 0).toFixed(2)})
+                                    {acc.account_name} (₹{Number(acc.balance ?? acc.initial_balance ?? 0).toFixed(2)})
                                 </option>
                             ))}
                         </select>
@@ -140,6 +169,18 @@ export default function Transactions() {
                             <option value="EXPENSE">Expense</option>
                         </select>
 
+                        <select
+                            value={form.category_id}
+                            onChange={e => setForm({...form, category_id: e.target.value})}
+                        >
+                            <option value="">No Category</option>
+                            {filteredCategories.map(cat => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}{cat.type ? ` (${cat.type})` : ''}
+                                </option>
+                            ))}
+                        </select>
+
                         <input
                             type="date"
                             value={form.transactionDate}
@@ -163,6 +204,7 @@ export default function Transactions() {
                             <th>Date</th>
                             <th>Description</th>
                             <th>Account</th>
+                            <th>Category</th>
                             <th>Type</th>
                             <th>Amount</th>
                             <th>Actions</th>
@@ -174,6 +216,7 @@ export default function Transactions() {
                                 <td>{tx.date || tx.transactionDate || 'N/A'}</td>
                                 <td>{tx.description || 'No description'}</td>
                                 <td>{tx.accountName || `Account #${tx.account_id}`}</td>
+                                <td>{getCategoryName(tx.category_id) || '—'}</td>
                                 <td>{tx.transactionType}</td>
                                 <td style={{
                                     fontWeight: 'bold',

@@ -148,9 +148,9 @@ export default function Accounts() {
                                 <td>{acc.account_type || '—'}</td>
                                 <td style={{
                                     fontWeight: 'bold',
-                                    color: Number(acc.initial_balance || 0) >= 0 ? '#16a34a' : '#ef4444'
+                                    color: Number(acc.balance ?? acc.initial_balance ?? 0) >= 0 ? '#16a34a' : '#ef4444'
                                 }}>
-                                    ₹{Number(acc.initial_balance || 0).toFixed(2)}
+                                    ₹{Number(acc.balance ?? acc.initial_balance ?? 0).toFixed(2)}
                                 </td>
                                 <td>{acc.currency || 'INR'}</td>
                                 <td>

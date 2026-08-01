@@ -1,5 +1,7 @@
 package com.fintrack.finance_tracker.accounts;
 
+import com.fintrack.finance_tracker.transactions.Transaction;
+import com.fintrack.finance_tracker.transactions.TransactionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,10 +14,12 @@ import java.util.stream.Collectors;
 @Service
 public class AccountService {
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
     @Autowired
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public List<Account> getAccounts() {
@@ -23,12 +27,15 @@ public class AccountService {
     }
 
     public Optional<Account> getAccountById(int searchKey) {
-        return accountRepository.findById(searchKey);
+        Optional<Account> account = accountRepository.findById(searchKey);
+        account.ifPresent(this::backfillBalance);
+        return account;
     }
 
     public List<Account> getAccountsByUserId(int searchKey) {
         return accountRepository.findAll().stream()
                 .filter(account -> (account.getUserId() == searchKey))
+                .peek(this::backfillBalance)
                 .collect(Collectors.toList());
     }
 
@@ -42,6 +49,9 @@ public class AccountService {
     public Account addAccount(Account account) {
         if (account.getCreatedAt() == null) {
             account.setCreatedAt(LocalDateTime.now());
+        }
+        if (account.getBalance() == null) {
+            account.setBalance(account.getInitialBalance());
         }
         return accountRepository.save(account);
     }
@@ -73,5 +83,24 @@ public class AccountService {
     @Transactional
     public void deleteAccount(int id) {
         accountRepository.deleteById(id);
+    }
+
+    private void backfillBalance(Account account) {
+        if (account.getBalance() != null) {
+            return;
+        }
+
+        double computedBalance = account.getInitialBalance();
+        for (Transaction transaction : transactionRepository.findByAccountId(account.getId())) {
+            computedBalance += isIncome(transaction.getTransactionType())
+                    ? transaction.getAmount()
+                    : -transaction.getAmount();
+        }
+        account.setBalance(computedBalance);
+    }
+
+    private boolean isIncome(String transactionType) {
+        return transactionType != null
+                && (transactionType.equalsIgnoreCase("INCOME") || transactionType.equalsIgnoreCase("CREDIT"));
     }
 }
