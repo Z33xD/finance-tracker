@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/accounts")
+@RequestMapping(path = "/api/accounts/")
 public class AccountController {
     private final AccountService accountService;
 

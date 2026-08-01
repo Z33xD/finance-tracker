@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/categories")
+@RequestMapping(path = "/api/categories/")
 public class CategoryController {
     private final CategoryService categoryService;
 

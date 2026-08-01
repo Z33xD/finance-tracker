@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "api/budgets")
+@RequestMapping(path = "/api/budgets/")
 public class BudgetController {
     private final BudgetService budgetService;
 

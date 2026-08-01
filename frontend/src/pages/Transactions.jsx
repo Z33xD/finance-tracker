@@ -111,7 +111,7 @@ export default function Transactions() {
                             <option value="">Select Account</option>
                             {accounts.map(acc => (
                                 <option key={acc.id} value={acc.id}>
-                                    {acc.name} (₹{Number(acc.balance || 0).toFixed(2)})
+                                    {acc.account_name} (₹{Number(acc.initial_balance || 0).toFixed(2)})
                                 </option>
                             ))}
                         </select>
