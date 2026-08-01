@@ -2,14 +2,14 @@ package com.fintrack.finance_tracker.accounts;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class AccountService {
     private final AccountRepository accountRepository;
 
@@ -38,14 +38,15 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Account addAccount(Account account) {
         if (account.getCreatedAt() == null) {
             account.setCreatedAt(LocalDateTime.now());
         }
-        System.out.println(account.getAccountName());
         return accountRepository.save(account);
     }
 
+    @Transactional
     public Account updateAccount(int id, Account updatedAccount) {
         Optional<Account> existingAccount = accountRepository.findById(id);
 
