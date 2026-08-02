@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/accounts")
+@RequestMapping(path = "/api/accounts/")
 public class AccountController {
     private final AccountService accountService;
 
@@ -26,6 +26,12 @@ public class AccountController {
     public List<Account> getAccountsForCurrentUser() {
         User currentUser = getAuthenticatedUser();
         return accountService.getAccountsByUserId(currentUser.getId());
+    }
+
+    @GetMapping("/summary")
+    public AccountSummary getAccountSummary(@RequestParam(required = false) String base) {
+        User currentUser = getAuthenticatedUser();
+        return accountService.getAccountSummary(currentUser.getId(), base);
     }
 
     @GetMapping("/{id}")
@@ -44,11 +50,9 @@ public class AccountController {
     public ResponseEntity<Account> addAccount(@RequestBody Account account) {
         System.out.println("addAccount() hit");
         User currentUser = getAuthenticatedUser();
-        System.out.println("Authenticated User ID: " + currentUser.getId());
         account.setUserId(currentUser.getId());
 
         Account createdAccount = accountService.addAccount(account);
-        System.out.println(account.getAccountName());
         return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
     }
 

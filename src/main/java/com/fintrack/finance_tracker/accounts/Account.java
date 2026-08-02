@@ -31,17 +31,21 @@ public class Account {
     @JsonProperty("initial_balance")
     private double initialBalance;
 
+    @Column(name = "balance")
+    private Double balance;
+
     @Column(name = "created_at")
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
-    public Account(Integer id, Integer userId, String accountName, String accountType, String currency, double initialBalance, LocalDateTime createdAt) {
+    public Account(Integer id, Integer userId, String accountName, String accountType, String currency, double initialBalance, Double balance, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.accountName = accountName;
         this.accountType = accountType;
         this.currency = currency;
         this.initialBalance = initialBalance;
+        this.balance = balance;
         this.createdAt = createdAt;
     }
 
@@ -93,6 +97,14 @@ public class Account {
 
     public void setInitialBalance(double initialBalance) {
         this.initialBalance = initialBalance;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
     }
 
     public LocalDateTime getCreatedAt() {

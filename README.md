@@ -26,6 +26,13 @@ This is a Spring Boot based application that [I](https://www.github.com/Z33xD) m
 - **CSV Bulk Imports:** High-performance transactional ingestion handling bulk data with custom duplicate detection, historical logging, and `import_batch` error metrics tracking.
 - **Live Exchange Rates:** Dynamically handles currency conversions across assets using integration hooks with the external [ExchangeRate-API](https://www.exchangerate-api.com/).
 
+### Multi-Currency Support
+- Accounts and budgets are each denominated in their own currency (all ~160 ExchangeRate-API codes are supported).
+- Amounts are always stored in their native currency; conversion happens only at read/summary time via stored `exchange_rates` pairs for the transaction's date.
+- The reporting currency is derived from your first-created account, and `GET /api/accounts/summary` converts every account balance into it for the dashboard total.
+- `GET /api/budgets/summary` computes actual spending converted into each budget's own currency.
+- Cross-rates are derived through the reporting currency as an anchor; rates refresh on demand (cached once per day) or manually via `POST /api/exchange-rates/refresh`.
+
 ---
 ## Architecture & Tech Stack
 
@@ -60,6 +67,13 @@ All core REST resources expect a valid JWT passed via the Authorisation: Bearer 
 | /categories     | GET / POST                | Secured: Custom categorisations                            |
 | /budgets        | GET / POST / PUT          | Secured: Spending caps and allocations                     |
 | /import-batches | GET / POST                | Secured: Multi-line CSV parsing and logs                   |
+
+### Batch CSV Ingestion
+`POST /api/import-batches/upload` ingests transactions from a CSV payload (`multipart/form-data` with a target `account_id`). The pipeline is staged, not one-shot:
+1. **Load & stage** — the file is parsed with `commons-csv` into an `import_batches` row (`status = pending`) that records the ingest job.
+2. **Row-wise ETL** — each record is parsed (`category_id`, `amount`, `transaction_date`, `description`, `transaction_type`), validated, and de-duplicated against existing rows by `(date, amount, description, category_id, type)` before it is written to `transactions`.
+3. **Ledger effect** — accepted rows are committed through the same transactional balance path as manual entries, so account balances stay consistent.
+4. **Job metrics** — the batch is finalised with `total_records` / `successful_records` / `failed_records` and a terminal `processed` / `failed` status, giving per-file audit and error-count telemetry via `GET /api/import-batches`.
 
 ---
 
@@ -99,15 +113,5 @@ npm install
 npm run dev
 ```
 The frontend, by default, runs on: http://localhost:5173/
-
----
-
-## Active Development
-
-- [ ] Finalising token authentication filters and routing controller debugging.
-- [ ] Enhancing the user interface.
-- [ ] Implementing automated recurring transaction schedulers.
-- [ ] Enhancing the data visualisation layer for predictive budgeting analytics.
-- [ ] Dockerising the application
 
 ---
