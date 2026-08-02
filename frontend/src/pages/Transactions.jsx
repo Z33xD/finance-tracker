@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { formatMoney } from '../utils/format';
 
 export default function Transactions() {
     const [transactions, setTransactions] = useState([]);
@@ -7,6 +8,11 @@ export default function Transactions() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const accountCurrencyMap = {};
+    accounts.forEach(acc => {
+        if (acc && acc.id) accountCurrencyMap[acc.id] = acc.currency || 'INR';
+    });
 
     const [form, setForm] = useState({
         description: '',
@@ -110,7 +116,7 @@ export default function Transactions() {
         try {
             await api.delete(`/api/transactions/${id}`);
             fetchData();
-        } catch (err) {
+        } catch {
             alert("Failed to delete transaction");
         }
     };
@@ -140,7 +146,7 @@ export default function Transactions() {
                             <option value="">Select Account</option>
                             {accounts.map(acc => (
                                 <option key={acc.id} value={acc.id}>
-                                    {acc.account_name} (₹{Number(acc.balance ?? acc.initial_balance ?? 0).toFixed(2)})
+                                    {acc.account_name} ({formatMoney(acc.balance ?? acc.initial_balance ?? 0, acc.currency || 'INR')})
                                 </option>
                             ))}
                         </select>
@@ -224,7 +230,7 @@ export default function Transactions() {
                                         ? '#16a34a' : '#ef4444'
                                 }}>
                                     {(tx.transactionType === 'INCOME' || tx.transactionType === 'CREDIT') ? '+' : '-'}
-                                    ₹{Number(tx.amount || 0).toFixed(2)}
+                                    {formatMoney(tx.amount || 0, accountCurrencyMap[tx.account_id] || 'INR')}
                                 </td>
                                 <td>
                                     <button className="danger" onClick={() => deleteTx(tx.id)}>Delete</button>

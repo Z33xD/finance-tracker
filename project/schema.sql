@@ -19,6 +19,7 @@ CREATE TABLE "accounts" (
     "account_type" VARCHAR(32), -- savings, credit_card, etc.
     "currency" CHAR(3) DEFAULT 'INR',
     "initial_balance" DECIMAL(12, 2) DEFAULT 0,
+    "balance" DECIMAL(12, 2),
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY ("id")
 );
@@ -51,6 +52,7 @@ CREATE TABLE "budgets" (
     "user_id" INT REFERENCES "users"("id") ON DELETE CASCADE,
     "category_id" INT REFERENCES "categories"("id"),
     "amount" DECIMAL(12, 2) NOT NULL,
+    "currency" CHAR(3) DEFAULT 'INR',
     "month" INT NOT NULL CHECK ( month BETWEEN 1 AND 12 ),
     "year" INT NOT NULL,
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

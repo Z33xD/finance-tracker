@@ -19,6 +19,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             String transaction_type
     );
     List<Transaction> findByAccountIdInAndTransactionDate(List<Integer> accountIds, LocalDate date);
+    List<Transaction> findByAccountIdInAndTransactionDateBetween(List<Integer> accountIds, LocalDate start, LocalDate end);
     List<Transaction> findByAccountIdIn(List<Integer> accountIds);
     List<Transaction> findByAccountId(int accountId);
 }

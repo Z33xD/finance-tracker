@@ -84,7 +84,7 @@ public class ImportBatchService {
         importBatchRepository.deleteById(id);
     }
 
-    public ImportBatch processCsv(MultipartFile file) {
+    public ImportBatch processCsv(MultipartFile file, int accountId) {
 
         validateFile(file);
 
@@ -96,7 +96,7 @@ public class ImportBatchService {
         importBatchRepository.save(batch);
 
         try {
-            parseCsv(file.getInputStream(), batch);
+            parseCsv(file.getInputStream(), batch, accountId);
             batch.setStatus("Processed");
             batch.setCompleted_at(LocalDateTime.now());
         } catch (Exception e) {
@@ -107,7 +107,7 @@ public class ImportBatchService {
         return importBatchRepository.save(batch);
     }
 
-    private void parseCsv(InputStream inputStream, ImportBatch batch) throws IOException {
+    private void parseCsv(InputStream inputStream, ImportBatch batch, int accountId) throws IOException {
 
         int total = 0;
         int success = 0;
@@ -148,6 +148,7 @@ public class ImportBatchService {
                     }
 
                     Transaction transaction = new Transaction();
+                    transaction.setAccountId(accountId);
                     transaction.setCategoryId(categoryId);
                     transaction.setAmount(amount);
                     transaction.setTransactionDate(transaction_date);

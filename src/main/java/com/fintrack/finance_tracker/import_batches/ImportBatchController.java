@@ -53,8 +53,9 @@ public class ImportBatchController {
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImportBatch> upload(@RequestParam("file") MultipartFile file) {
-        ImportBatch batch = importBatchService.processCsv(file);
+    public ResponseEntity<ImportBatch> upload(@RequestParam("file") MultipartFile file,
+                                              @RequestParam("account_id") int accountId) {
+        ImportBatch batch = importBatchService.processCsv(file, accountId);
         return ResponseEntity.status(HttpStatus.CREATED).body(batch);
     }
 

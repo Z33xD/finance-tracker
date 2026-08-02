@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { CURRENCIES } from '../constants/currencies';
+import { formatMoney } from '../utils/format';
 
 export default function Accounts() {
     const [accounts, setAccounts] = useState([]);
@@ -105,9 +107,9 @@ export default function Accounts() {
                         value={form.currency}
                         onChange={(e) => setForm({ ...form, currency: e.target.value })}
                     >
-                        <option value="INR">INR (₹)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
+                        {CURRENCIES.map(c => (
+                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                        ))}
                     </select>
 
                     <select
@@ -150,7 +152,7 @@ export default function Accounts() {
                                     fontWeight: 'bold',
                                     color: Number(acc.balance ?? acc.initial_balance ?? 0) >= 0 ? '#16a34a' : '#ef4444'
                                 }}>
-                                    ₹{Number(acc.balance ?? acc.initial_balance ?? 0).toFixed(2)}
+                                    {formatMoney(acc.balance ?? acc.initial_balance ?? 0, acc.currency || 'INR')}
                                 </td>
                                 <td>{acc.currency || 'INR'}</td>
                                 <td>

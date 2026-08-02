@@ -7,13 +7,13 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
+import { CURRENCIES } from '../constants/currencies';
+import { formatMoney } from '../utils/format';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Budgets() {
-    const [budgets, setBudgets] = useState([]);
-    const [spending, setSpending] = useState({}); // { [budgetId]: actualSpent }
-    const [spendingLoading, setSpendingLoading] = useState(false);
+    const [summaries, setSummaries] = useState([]); // { id, categoryId, currency, amount, spent, remaining }
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -21,6 +21,7 @@ export default function Budgets() {
     const [form, setForm] = useState({
         category_id: '',
         amount: 0,
+        currency: 'INR',
         month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
     });
@@ -29,51 +30,32 @@ export default function Budgets() {
         setLoading(true);
         setError(null);
         try {
-            // Fetch budgets
-            const budgetRes = await api.get('/api/budgets/');
-            let budgetList = [];
-            if (Array.isArray(budgetRes.data)) budgetList = budgetRes.data;
-            else if (budgetRes.data?.content && Array.isArray(budgetRes.data.content)) budgetList = budgetRes.data.content;
-            else if (budgetRes.data) budgetList = [budgetRes.data];
-            setBudgets(budgetList);
+            // Fetch budget summaries (amount + converted spent per budget)
+            const [summaryRes, catRes, accountRes] = await Promise.all([
+                api.get('/api/budgets/summary'),
+                api.get('/api/categories/'),
+                api.get('/api/accounts/summary'),
+            ]);
 
-            // Fetch categories for the dropdown
-            const catRes = await api.get('/api/categories/');
+            let summaryList = [];
+            if (Array.isArray(summaryRes.data)) summaryList = summaryRes.data;
+            else if (summaryRes.data?.content && Array.isArray(summaryRes.data.content)) summaryList = summaryRes.data.content;
+            else if (summaryRes.data) summaryList = [summaryRes.data];
+            setSummaries(summaryList);
+
             let categoryList = [];
             if (Array.isArray(catRes.data)) categoryList = catRes.data;
             else if (catRes.data?.content && Array.isArray(catRes.data.content)) categoryList = catRes.data.content;
             else if (catRes.data) categoryList = [catRes.data];
             setCategories(categoryList);
 
-            // Fetch actual spending per budget (for the budget's own month/year) via the search endpoint
-            setSpendingLoading(true);
-            const spendingMap = {};
-            await Promise.all(budgetList.map(async (budget) => {
-                if (!budget.category_id) return;
-
-                const monthPadded = String(budget.month).padStart(2, '0');
-                const lastDay = new Date(budget.year, budget.month, 0).getDate();
-                const res = await api.get('/api/transactions/search', {
-                    params: {
-                        category_id: budget.category_id,
-                        start_date: `${budget.year}-${monthPadded}-01`,
-                        end_date: `${budget.year}-${monthPadded}-${lastDay}`,
-                        transaction_type: 'EXPENSE',
-                    },
-                });
-
-                let txList = [];
-                if (Array.isArray(res.data)) txList = res.data;
-                else if (res.data?.content && Array.isArray(res.data.content)) txList = res.data.content;
-                spendingMap[budget.id] = txList.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-            }));
-            setSpending(spendingMap);
+            const base = accountRes.data?.base || 'INR';
+            setForm(prev => ({ ...prev, currency: base }));
         } catch (err) {
             console.error(err);
             setError("Failed to load budgets");
         } finally {
             setLoading(false);
-            setSpendingLoading(false);
         }
     };
 
@@ -96,6 +78,7 @@ export default function Budgets() {
             setForm({
                 category_id: '',
                 amount: 0,
+                currency: 'INR',
                 month: new Date().getMonth() + 1,
                 year: new Date().getFullYear(),
             });
@@ -115,9 +98,9 @@ export default function Budgets() {
 
     // Prepare data for Pie Chart
     const chartData = {
-        labels: budgets.map(b => getCategoryName(b.category_id) || b.category || 'Unknown'),
+        labels: summaries.map(s => getCategoryName(s.categoryId) || `Category #${s.categoryId}`),
         datasets: [{
-            data: budgets.map(b => b.amount || 0),
+            data: summaries.map(s => s.amount || 0),
             backgroundColor: [
                 '#3b82f6', '#ef4444', '#10b981', '#f59e0b',
                 '#8b5cf6', '#ec4899', '#14b8a6'
@@ -165,6 +148,14 @@ export default function Budgets() {
                         onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })}
                         required
                     />
+                    <select
+                        value={form.currency}
+                        onChange={e => setForm({ ...form, currency: e.target.value })}
+                    >
+                        {CURRENCIES.map(c => (
+                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                        ))}
+                    </select>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <select
                             value={form.month}
@@ -190,26 +181,23 @@ export default function Budgets() {
             {/* Budget List with Comparison */}
             <div className="card">
                 <h2>Current Budgets vs Actual Spending</h2>
-                {budgets.length === 0 ? (
+                {summaries.length === 0 ? (
                     <p>No budgets set yet. Create one above.</p>
                 ) : (
                     <div>
-                        {spendingLoading && (
-                            <small style={{ color: '#64748b', display: 'block', marginBottom: '10px' }}>
-                                Calculating actual spending...
-                            </small>
-                        )}
-                        {budgets.map((budget, index) => {
-                            const actual = spending[budget.id] || 0;
-                            const percentage = budget.amount > 0 ? Math.min((actual / budget.amount) * 100, 100) : 0;
-                            const isOver = actual > budget.amount;
+                        {summaries.map((summary, index) => {
+                            const actual = summary.spent || 0;
+                            const amount = summary.amount || 0;
+                            const currency = summary.currency || 'INR';
+                            const percentage = amount > 0 ? Math.min((actual / amount) * 100, 100) : 0;
+                            const isOver = actual > amount;
 
                             return (
-                                <div key={budget.id || index} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                                <div key={summary.id || index} style={{ marginBottom: '20px', padding: '15px', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <strong>{getCategoryName(budget.category_id) || budget.category || `Category #${budget.category_id}`}</strong>
+                                        <strong>{getCategoryName(summary.categoryId) || `Category #${summary.categoryId}`}</strong>
                                         <span>
-                      ₹{actual.toFixed(2)} / ₹{budget.amount.toFixed(2)}
+                      {formatMoney(actual, currency)} / {formatMoney(amount, currency)}
                     </span>
                                     </div>
                                     <div style={{ height: '12px', background: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
@@ -233,7 +221,7 @@ export default function Budgets() {
             </div>
 
             {/* Budget Allocation Pie Chart */}
-            {budgets.length > 0 && (
+            {summaries.length > 0 && (
                 <div className="card">
                     <h2>Budget Allocation</h2>
                     <div style={{ height: '300px', maxWidth: '500px', margin: '0 auto' }}>
