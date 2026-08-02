@@ -20,17 +20,20 @@ public class Budget {
 
     private double amount;
 
+    private String currency;
+
     private int month;
 
     private int year;
 
     private LocalDateTime created_at;
 
-    public Budget(int id, int user_id, int category_id, double amount, int month, int year, LocalDateTime created_at) {
+    public Budget(int id, int user_id, int category_id, double amount, String currency, int month, int year, LocalDateTime created_at) {
         this.id = id;
         this.user_id = user_id;
         this.category_id = category_id;
         this.amount = amount;
+        this.currency = currency;
         this.month = month;
         this.year = year;
         this.created_at = created_at;
@@ -68,6 +71,14 @@ public class Budget {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public int getMonth() {

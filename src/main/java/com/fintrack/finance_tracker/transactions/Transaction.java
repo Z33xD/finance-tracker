@@ -1,7 +1,11 @@
 package com.fintrack.finance_tracker.transactions;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -12,18 +16,22 @@ import java.time.LocalDateTime;
 @Table(name = "transactions")
 public class Transaction {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true)
     private int id;
 
+    @JsonProperty("account_id")
     @Column(name = "account_id")
     private int accountId;
 
+    @JsonProperty("category_id")
     @Column(name = "category_id")
-    private int categoryId;
+    private Integer categoryId;
 
     @Column(name = "amount")
     private double amount;
 
+    @JsonAlias("date")
     @Column(name = "transaction_date")
     private LocalDate transactionDate;
 
@@ -39,7 +47,7 @@ public class Transaction {
     @Column(name = "datetime")
     private LocalDateTime datetime;
 
-    public Transaction(int id, int accountId, int categoryId, double amount, LocalDate transactionDate, String description, String transactionType, int importBatchId, LocalDateTime datetime) {
+    public Transaction(int id, int accountId, Integer categoryId, double amount, LocalDate transactionDate, String description, String transactionType, int importBatchId, LocalDateTime datetime) {
         this.id = id;
         this.accountId = accountId;
         this.categoryId = categoryId;
@@ -69,11 +77,11 @@ public class Transaction {
         this.accountId = accountId;
     }
 
-    public int getCategoryId() {
+    public Integer getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
     }
 

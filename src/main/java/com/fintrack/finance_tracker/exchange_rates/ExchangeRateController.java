@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/exchange-rates")
+@RequestMapping(path = "/api/exchange-rates/")
 public class ExchangeRateController {
     private final ExchangeRateService exchangeRateService;
 

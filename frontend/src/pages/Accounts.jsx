@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { CURRENCIES } from '../constants/currencies';
+import { formatMoney } from '../utils/format';
 
 export default function Accounts() {
     const [accounts, setAccounts] = useState([]);
@@ -7,10 +9,10 @@ export default function Accounts() {
     const [error, setError] = useState(null);
 
     const [form, setForm] = useState({
-        name: '',
-        balance: 0,
+        account_name: '',
+        initial_balance: 0,
         currency: 'INR',
-        accountType: 'SAVINGS'   // optional - adjust if your entity has different types
+        account_type: 'SAVINGS'
     });
 
     const fetchAccounts = async () => {
@@ -43,7 +45,7 @@ export default function Accounts() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.name.trim()) {
+        if (!form.account_name.trim()) {
             alert("Account name is required");
             return;
         }
@@ -51,10 +53,10 @@ export default function Accounts() {
         try {
             await api.post('/api/accounts/', form);
             setForm({
-                name: '',
-                balance: 0,
+                account_name: '',
+                initial_balance: 0,
                 currency: 'INR',
-                accountType: 'SAVINGS'
+                account_type: 'SAVINGS'
             });
             fetchAccounts(); // refresh list
             alert("Account created successfully!");
@@ -88,8 +90,8 @@ export default function Accounts() {
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '12px', maxWidth: '450px' }}>
                     <input
                         placeholder="Account Name (e.g. Savings Account, Credit Card)"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        value={form.account_name}
+                        onChange={(e) => setForm({ ...form, account_name: e.target.value })}
                         required
                     />
 
@@ -97,22 +99,22 @@ export default function Accounts() {
                         type="number"
                         step="0.01"
                         placeholder="Initial Balance"
-                        value={form.balance}
-                        onChange={(e) => setForm({ ...form, balance: parseFloat(e.target.value) || 0 })}
+                        value={form.initial_balance}
+                        onChange={(e) => setForm({ ...form, initial_balance: parseFloat(e.target.value) || 0 })}
                     />
 
                     <select
                         value={form.currency}
                         onChange={(e) => setForm({ ...form, currency: e.target.value })}
                     >
-                        <option value="INR">INR (₹)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
+                        {CURRENCIES.map(c => (
+                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                        ))}
                     </select>
 
                     <select
-                        value={form.accountType}
-                        onChange={(e) => setForm({ ...form, accountType: e.target.value })}
+                        value={form.account_type}
+                        onChange={(e) => setForm({ ...form, account_type: e.target.value })}
                     >
                         <option value="SAVINGS">Savings</option>
                         <option value="CHECKING">Checking / Current</option>
@@ -144,13 +146,13 @@ export default function Accounts() {
                         <tbody>
                         {accounts.map((acc, index) => (
                             <tr key={acc.id || index}>
-                                <td><strong>{acc.name}</strong></td>
-                                <td>{acc.accountType || '—'}</td>
+                                <td><strong>{acc.account_name}</strong></td>
+                                <td>{acc.account_type || '—'}</td>
                                 <td style={{
                                     fontWeight: 'bold',
-                                    color: Number(acc.balance || 0) >= 0 ? '#16a34a' : '#ef4444'
+                                    color: Number(acc.balance ?? acc.initial_balance ?? 0) >= 0 ? '#16a34a' : '#ef4444'
                                 }}>
-                                    ₹{Number(acc.balance || 0).toFixed(2)}
+                                    {formatMoney(acc.balance ?? acc.initial_balance ?? 0, acc.currency || 'INR')}
                                 </td>
                                 <td>{acc.currency || 'INR'}</td>
                                 <td>
