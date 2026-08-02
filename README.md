@@ -68,6 +68,13 @@ All core REST resources expect a valid JWT passed via the Authorisation: Bearer 
 | /budgets        | GET / POST / PUT          | Secured: Spending caps and allocations                     |
 | /import-batches | GET / POST                | Secured: Multi-line CSV parsing and logs                   |
 
+### Batch CSV Ingestion
+`POST /api/import-batches/upload` ingests transactions from a CSV payload (`multipart/form-data` with a target `account_id`). The pipeline is staged, not one-shot:
+1. **Load & stage** — the file is parsed with `commons-csv` into an `import_batches` row (`status = pending`) that records the ingest job.
+2. **Row-wise ETL** — each record is parsed (`category_id`, `amount`, `transaction_date`, `description`, `transaction_type`), validated, and de-duplicated against existing rows by `(date, amount, description, category_id, type)` before it is written to `transactions`.
+3. **Ledger effect** — accepted rows are committed through the same transactional balance path as manual entries, so account balances stay consistent.
+4. **Job metrics** — the batch is finalised with `total_records` / `successful_records` / `failed_records` and a terminal `processed` / `failed` status, giving per-file audit and error-count telemetry via `GET /api/import-batches`.
+
 ---
 
 ## Configuration & Environment Variables
