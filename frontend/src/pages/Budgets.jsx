@@ -282,7 +282,7 @@ export default function Budgets() {
                                     return (
                                         <li
                                             key={summary.id || index}
-                                            className="rounded-2xl bg-slate-50/60 p-4 ring-1 ring-slate-900/5"
+                                            className="rounded-2xl bg-ivory-100/70 p-4 ring-1 ring-slate-900/5"
                                         >
                                             <div className="flex items-center justify-between gap-3">
                                                 <p className="truncate text-sm font-semibold text-slate-900">
@@ -303,7 +303,7 @@ export default function Budgets() {
                                                 </p>
                                             </div>
 
-                                            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/70 ring-1 ring-inset ring-slate-900/5">
+                                            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-ivory-200/70 ring-1 ring-inset ring-slate-900/5">
                                                 <div
                                                     className={`h-full rounded-full transition-all duration-500 ${barClass}`}
                                                     style={{ width: `${displayPercentage}%` }}

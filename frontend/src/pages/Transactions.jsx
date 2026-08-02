@@ -352,7 +352,7 @@ export default function Transactions() {
                     <h2 className="card-title">Import Transactions (CSV)</h2>
                     <p className="card-subtitle">
                         Bulk-import rows using the format{' '}
-                        <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-600">
+                        <code className="rounded bg-ivory-200 px-1.5 py-0.5 font-mono text-xs text-slate-600">
                             category_id, amount, transaction_date (yyyy-MM-dd), description, transaction_type
                         </code>
                     </p>

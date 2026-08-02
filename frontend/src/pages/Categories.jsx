@@ -153,7 +153,7 @@ export default function Categories() {
 
                         <div className="field">
                             <label htmlFor="colour" className="label">Colour</label>
-                            <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2.5 ring-1 ring-inset ring-slate-200">
+                            <div className="flex items-center gap-3 rounded-lg bg-ivory-100 px-3 py-2.5 ring-1 ring-inset ring-ivory-200">
                                 <input
                                     id="colour"
                                     type="color"
