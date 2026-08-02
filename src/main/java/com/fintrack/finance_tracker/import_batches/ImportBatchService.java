@@ -2,6 +2,7 @@ package com.fintrack.finance_tracker.import_batches;
 
 import com.fintrack.finance_tracker.transactions.Transaction;
 import com.fintrack.finance_tracker.transactions.TransactionRepository;
+import com.fintrack.finance_tracker.transactions.TransactionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,30 +28,36 @@ import java.util.stream.Collectors;
 public class ImportBatchService {
     private final ImportBatchRepository importBatchRepository;
     private final TransactionRepository transactionRepository;
+    private final TransactionService transactionService;
 
     @Autowired
-    public ImportBatchService(ImportBatchRepository importBatchRepository, TransactionRepository transactionRepository) {
+    public ImportBatchService(ImportBatchRepository importBatchRepository,
+                              TransactionRepository transactionRepository,
+                              TransactionService transactionService) {
         this.importBatchRepository = importBatchRepository;
         this.transactionRepository = transactionRepository;
+        this.transactionService = transactionService;
     }
 
-    public List<ImportBatch> getImportBatches() {
-        return importBatchRepository.findAll();
+    public List<ImportBatch> getImportBatchesForUser(int userId) {
+        return importBatchRepository.findByUserId(userId);
     }
 
-    public Optional<ImportBatch> getImportBatchById(int searchKey) {
-        return importBatchRepository.findById(searchKey);
+    public Optional<ImportBatch> getImportBatchByIdForUser(int id, int userId) {
+        return importBatchRepository.findByIdAndUserId(id, userId);
     }
 
-    public List<ImportBatch> getImportBatchesByFileName(String searchString) {
-        return importBatchRepository.findAll().stream()
-                .filter(importBatch -> importBatch.getFile_name().toLowerCase().contains(searchString.toLowerCase()))
+    public List<ImportBatch> getImportBatchesByFileName(int userId, String searchString) {
+        return importBatchRepository.findByUserId(userId).stream()
+                .filter(importBatch -> importBatch.getFile_name() != null
+                        && importBatch.getFile_name().toLowerCase().contains(searchString.toLowerCase()))
                 .collect(Collectors.toList());
     }
 
-    public List<ImportBatch> getImportBatchesByStatus(String searchString) {
-        return importBatchRepository.findAll().stream()
-                .filter(importBatch -> importBatch.getStatus().equalsIgnoreCase(searchString))
+    public List<ImportBatch> getImportBatchesByStatus(int userId, String searchString) {
+        return importBatchRepository.findByUserId(userId).stream()
+                .filter(importBatch -> importBatch.getStatus() != null
+                        && importBatch.getStatus().equalsIgnoreCase(searchString))
                 .collect(Collectors.toList());
     }
 
@@ -80,16 +87,18 @@ public class ImportBatchService {
     }
 
     @Transactional
-    public void deleteImportBatch(int id) {
-        importBatchRepository.deleteById(id);
+    public void deleteImportBatch(int id, int userId) {
+        importBatchRepository.deleteByIdAndUserId(id, userId);
     }
 
-    public ImportBatch processCsv(MultipartFile file, int accountId) {
+    public ImportBatch processCsv(MultipartFile file, int accountId, int userId) {
 
         validateFile(file);
 
         ImportBatch batch = new ImportBatch();
+        batch.setUser_id(userId);
         batch.setFile_name(file.getOriginalFilename());
+        batch.setImport_type("csv");
         batch.setStatus("Pending");
         batch.setStarted_at(LocalDateTime.now());
 
@@ -134,15 +143,14 @@ public class ImportBatchService {
 
                     int categoryId = Integer.parseInt(categoryIdStr);
                     double amount = Double.parseDouble(amountStr.replace(",", ""));
-                    LocalDate transaction_date = LocalDate.parse(transactionDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    LocalDate transactionDate = LocalDate.parse(transactionDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                     boolean isDuplicate = transactionRepository
                             .findByTransactionDateAndAmountAndDescriptionAndCategoryIdAndTransactionType(
-                                    transaction_date, amount, description, categoryId, transactionType
+                                    transactionDate, amount, description, categoryId, transactionType
                             ).isPresent();
 
                     if (isDuplicate) {
-                        System.out.println("Duplicate transaction found!");
                         failed++;
                         continue;
                     }
@@ -151,13 +159,13 @@ public class ImportBatchService {
                     transaction.setAccountId(accountId);
                     transaction.setCategoryId(categoryId);
                     transaction.setAmount(amount);
-                    transaction.setTransactionDate(transaction_date);
+                    transaction.setTransactionDate(transactionDate);
                     transaction.setDescription(description);
                     transaction.setTransactionType(transactionType);
 
                     transaction.setImportBatchId(batch.getId());
 
-                    transactionRepository.save(transaction);
+                    transactionService.addTransaction(transaction);
                     success++;
                 }
                 catch (Exception e) {
