@@ -115,13 +115,3 @@ npm run dev
 The frontend, by default, runs on: http://localhost:5173/
 
 ---
-
-## Active Development
-
-- [ ] Finalising token authentication filters and routing controller debugging.
-- [ ] Enhancing the user interface.
-- [ ] Implementing automated recurring transaction schedulers.
-- [ ] Enhancing the data visualisation layer for predictive budgeting analytics.
-- [ ] Dockerising the application
-
----
