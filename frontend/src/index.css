@@ -1,6 +1,6 @@
 /* ============================================================
    FINANCE TRACKER — GLOBAL UI THEME BLUEPRINT
-   Refined luxury aesthetic · Emerald brand + Slate neutrals
+   Refined luxury aesthetic · Emerald brand on warm ivory
    Tailwind v4 (CSS-first configuration)
    ============================================================ */
 
@@ -24,6 +24,12 @@
   --color-brand-800: #175539;
   --color-brand-900: #144630;
   --color-brand-950: #0a271a;
+
+  /* ---- Ivory: warm, elegant page & surface tones ---- */
+  --color-ivory-50: #fbfaf6;
+  --color-ivory-100: #f6f3ec;
+  --color-ivory-200: #ede7d9;
+  --color-ivory-300: #e0d7c3;
 
   /* ---- Typography ---- */
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -73,7 +79,7 @@
   }
 
   body {
-    @apply bg-slate-50 font-sans text-slate-600;
+    @apply bg-ivory-100 font-sans text-slate-600;
   }
 
   h1, h2, h3, h4 {
@@ -90,8 +96,8 @@
 
   /* Form primitives — existing pages use bare elements; keeps them refined */
   input, select, textarea {
-    @apply w-full rounded-lg border-0 bg-white px-3.5 py-2.5 text-sm text-slate-900
-           ring-1 ring-inset ring-slate-200 transition-shadow outline-none
+    @apply w-full rounded-lg border-0 bg-ivory-50 px-3.5 py-2.5 text-sm text-slate-900
+           ring-1 ring-inset ring-ivory-200 transition-shadow outline-none
            placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600;
   }
 
@@ -112,7 +118,7 @@
 
   /* ---- Surfaces ---- */
   .card {
-    @apply rounded-(--radius-card) bg-white p-6 shadow-card ring-1 ring-slate-900/5;
+    @apply rounded-(--radius-card) bg-ivory-50 p-6 shadow-card ring-1 ring-slate-900/5;
   }
 
   .card-title {
@@ -133,11 +139,11 @@
   }
 
   .btn-outline {
-    @apply btn bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300;
+    @apply btn bg-ivory-50 text-slate-700 ring-1 ring-ivory-200 hover:bg-ivory-100 hover:ring-ivory-300;
   }
 
   .btn-ghost {
-    @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+    @apply btn text-slate-600 hover:bg-ivory-200 hover:text-slate-900;
   }
 
   .btn-sm {
@@ -163,8 +169,8 @@
   }
 
   .input {
-    @apply w-full rounded-lg border-0 bg-white px-3.5 py-2.5 text-sm text-slate-900
-           ring-1 ring-inset ring-slate-200 transition-shadow outline-none
+    @apply w-full rounded-lg border-0 bg-ivory-50 px-3.5 py-2.5 text-sm text-slate-900
+           ring-1 ring-inset ring-ivory-200 transition-shadow outline-none
            placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600;
   }
 
@@ -178,12 +184,12 @@
   }
 
   .table thead th {
-    @apply border-b border-slate-200 px-3 py-2.5 text-left text-xs font-semibold
+    @apply border-b border-ivory-200 px-3 py-2.5 text-left text-xs font-semibold
            uppercase tracking-wider text-slate-500;
   }
 
   .table tbody td {
-    @apply border-b border-slate-100 px-3 py-3 text-slate-700;
+    @apply border-b border-ivory-100 px-3 py-3 text-slate-700;
   }
 
   .table tbody tr {
@@ -191,7 +197,7 @@
   }
 
   .table tbody tr:hover {
-    @apply bg-slate-50/70;
+    @apply bg-ivory-100/70;
   }
 
   /* ---- Money: elegant, aligned numerals ---- */
@@ -213,7 +219,7 @@
   }
 
   .badge-slate {
-    @apply badge bg-slate-100 text-slate-700 ring-slate-500/20;
+    @apply badge bg-ivory-200 text-slate-700 ring-ivory-300/60;
   }
 
   .badge-red {
@@ -222,7 +228,7 @@
 
   /* ---- Dashboard stat card ---- */
   .stat {
-    @apply rounded-(--radius-card) bg-white p-5 shadow-card ring-1 ring-slate-900/5;
+    @apply rounded-(--radius-card) bg-ivory-50 p-5 shadow-card ring-1 ring-slate-900/5;
   }
 
   .stat-label {
