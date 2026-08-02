@@ -45,36 +45,60 @@ export default function Profile() {
     };
 
     return (
-        <div>
-            <h1>Profile</h1>
-            <div className="card">
-                <h2>Account Details</h2>
-                <form onSubmit={handleUpdate} style={{ display: 'grid', gap: '12px', maxWidth: '450px' }}>
-                    <input
-                        value={form.username || ''}
-                        onChange={e => setForm({ ...form, username: e.target.value })}
-                        placeholder="Username"
-                        required
-                    />
-                    <input
-                        type="email"
-                        value={form.email || ''}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
-                        placeholder="Email"
-                        required
-                    />
-                    <button type="submit" className="primary" disabled={saving}>
-                        {saving ? 'Saving...' : 'Update Profile'}
-                    </button>
-                </form>
+        <div className="page">
+            <header className="mb-6">
+                <h1 className="text-2xl text-slate-900">Profile</h1>
+                <p className="mt-1 text-sm text-slate-500">Manage your account details and settings</p>
+            </header>
 
-                <hr style={{ margin: '24px 0', border: '1px solid #e5e7eb' }} />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {/* Account details */}
+                <div className="card h-fit lg:col-span-2">
+                    <h2 className="card-title">Account Details</h2>
+                    <p className="card-subtitle">Update the information associated with your login</p>
 
-                Note: Deleting your account is permanent. This action cannot be reversed.
-                <div>
+                    <form onSubmit={handleUpdate} className="max-w-md">
+                        <div className="field">
+                            <label htmlFor="username" className="label">Username</label>
+                            <input
+                                id="username"
+                                value={form.username || ''}
+                                onChange={e => setForm({ ...form, username: e.target.value })}
+                                placeholder="Username"
+                                required
+                                className="input"
+                            />
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="email" className="label">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={form.email || ''}
+                                onChange={e => setForm({ ...form, email: e.target.value })}
+                                placeholder="Email"
+                                required
+                                className="input"
+                            />
+                        </div>
+
+                        <button type="submit" className="btn-primary" disabled={saving}>
+                            {saving ? 'Saving...' : 'Update Profile'}
+                        </button>
+                    </form>
+                </div>
+
+                {/* Danger zone */}
+                <div className="card h-fit lg:col-span-1">
+                    <h2 className="card-title text-red-600">Danger Zone</h2>
+                    <p className="card-subtitle">
+                        Deleting your account is permanent. This action cannot be reversed.
+                    </p>
+
                     <button
-                        className="danger"
-                        style={{ marginTop: '20px' }}
+                        type="button"
+                        className="btn-danger w-full"
                         onClick={handleDelete}
                         disabled={deleting}
                     >
