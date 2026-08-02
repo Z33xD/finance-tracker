@@ -113,10 +113,8 @@ export default function Home() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6 lg:gap-6">
 
                 {/* Total balance hero */}
-                <div className="relative overflow-hidden rounded-(--radius-card) bg-brand-900 p-6 text-white shadow-card ring-1 ring-slate-900/5 md:col-span-2 lg:col-span-3 lg:row-span-2">
-                    <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand-500/25 blur-3xl" />
-                    <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-brand-400/10 blur-3xl" />
-
+                <div className="relative flex h-full flex-col overflow-hidden rounded-(--radius-card) bg-brand-900 p-6 text-white shadow-card ring-1 ring-slate-900/5 md:col-span-2 lg:col-span-3 lg:row-span-2">
+                    {/* Header */}
                     <div className="relative flex items-center justify-between">
                         <p className="text-sm font-medium text-brand-200">Total Balance</p>
                         <span className="badge bg-brand-500/20 text-brand-100 ring-brand-400/40">
@@ -124,16 +122,19 @@ export default function Home() {
                         </span>
                     </div>
 
-                    <p className="relative mt-5 text-4xl font-semibold tabular-nums tracking-tight text-white sm:text-5xl">
-                        {formatMoney(balance, baseCurrency)}
-                    </p>
+                    {/* Centered body */}
+                    <div className="relative flex flex-1 flex-col justify-center">
+                        <p className="text-4xl font-semibold tabular-nums tracking-tight text-white sm:text-5xl">
+                            {formatMoney(balance, baseCurrency)}
+                        </p>
 
-                    <div className="relative mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-brand-200/80">
-                        <span>{accountCount} {accountCount === 1 ? 'account' : 'accounts'}</span>
-                        <span className="h-3 w-px bg-brand-400/30" />
-                        <span>Net position</span>
-                        <span className="h-3 w-px bg-brand-400/30" />
-                        <span>Updated today</span>
+                        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-brand-200/80">
+                            <span>{accountCount} {accountCount === 1 ? "account" : "accounts"}</span>
+                            <span className="h-3 w-px bg-brand-400/30" />
+                            <span>Net position</span>
+                            <span className="h-3 w-px bg-brand-400/30" />
+                            <span>Updated today</span>
+                        </div>
                     </div>
                 </div>
 
@@ -227,8 +228,10 @@ export default function Home() {
                                 return (
                                     <li key={acc.id} className="flex items-center justify-between gap-3">
                                         <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium text-slate-900">{acc.account_name}</p>
-                                            <p className="text-xs text-slate-400">{acc.account_type || '—'} · {acc.currency || 'INR'}</p>
+                                            <p className="truncate text-sm font-medium text-slate-900">
+                                                {acc.accountName || acc.account_name || 'Account'}
+                                            </p>
+                                            <p className="text-xs text-slate-400">{acc.currency || 'INR'}</p>
                                         </div>
                                         <p className={`shrink-0 text-sm ${value >= 0 ? 'amount-pos' : 'amount-neg'}`}>
                                             {formatMoney(value, acc.currency || 'INR')}
