@@ -3,6 +3,13 @@ import api from '../services/api';
 import { CURRENCIES } from '../constants/currencies';
 import { formatMoney } from '../utils/format';
 
+const ACCOUNT_TYPE_BADGE = {
+    SAVINGS: 'badge-emerald',
+    CHECKING: 'badge-slate',
+    CREDIT: 'badge-red',
+    INVESTMENT: 'bg-brand-50 text-brand-700 ring-brand-600/20',
+};
+
 export default function Accounts() {
     const [accounts, setAccounts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -77,97 +84,149 @@ export default function Accounts() {
         }
     };
 
-    if (loading) return <div style={{ padding: '2rem' }}>Loading accounts...</div>;
-    if (error) return <div style={{ padding: '2rem', color: 'red' }}>{error}</div>;
+    if (loading) {
+        return (
+            <div className="page">
+                <div className="flex items-center justify-center py-24 text-sm text-slate-400">
+                    Loading accounts...
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="page">
+                <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-inset ring-red-600/20">
+                    {error}
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div>
-            <h1>My Accounts</h1>
+        <div className="page">
+            <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 className="text-2xl text-slate-900">My Accounts</h1>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Balances are shown in each account's native currency
+                    </p>
+                </div>
+                <span className="badge badge-slate w-fit">{accounts.length} linked</span>
+            </header>
 
-            {/* Add Account Form */}
-            <div className="card">
-                <h2>Create New Account</h2>
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '12px', maxWidth: '450px' }}>
-                    <input
-                        placeholder="Account Name (e.g. Savings Account, Credit Card)"
-                        value={form.account_name}
-                        onChange={(e) => setForm({ ...form, account_name: e.target.value })}
-                        required
-                    />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {/* Create New Account form */}
+                <div className="card h-fit lg:col-span-1">
+                    <h2 className="card-title">Create New Account</h2>
+                    <p className="card-subtitle">Link a savings, checking, credit or investment account</p>
 
-                    <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Initial Balance"
-                        value={form.initial_balance}
-                        onChange={(e) => setForm({ ...form, initial_balance: parseFloat(e.target.value) || 0 })}
-                    />
+                    <form onSubmit={handleSubmit}>
+                        <div className="field">
+                            <label htmlFor="account_name" className="label">Account Name</label>
+                            <input
+                                id="account_name"
+                                placeholder="e.g. Savings Account, Credit Card"
+                                value={form.account_name}
+                                onChange={(e) => setForm({ ...form, account_name: e.target.value })}
+                                required
+                                className="input"
+                            />
+                        </div>
 
-                    <select
-                        value={form.currency}
-                        onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                    >
-                        {CURRENCIES.map(c => (
-                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
-                        ))}
-                    </select>
+                        <div className="field">
+                            <label htmlFor="initial_balance" className="label">Initial Balance</label>
+                            <input
+                                id="initial_balance"
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={form.initial_balance}
+                                onChange={(e) => setForm({ ...form, initial_balance: parseFloat(e.target.value) || 0 })}
+                                className="input"
+                            />
+                        </div>
 
-                    <select
-                        value={form.account_type}
-                        onChange={(e) => setForm({ ...form, account_type: e.target.value })}
-                    >
-                        <option value="SAVINGS">Savings</option>
-                        <option value="CHECKING">Checking / Current</option>
-                        <option value="CREDIT">Credit Card</option>
-                        <option value="INVESTMENT">Investment</option>
-                    </select>
+                        <div className="field">
+                            <label htmlFor="currency" className="label">Currency</label>
+                            <select
+                                id="currency"
+                                value={form.currency}
+                                onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                                className="input"
+                            >
+                                {CURRENCIES.map(c => (
+                                    <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <button type="submit" className="primary">Create Account</button>
-                </form>
-            </div>
+                        <div className="field">
+                            <label htmlFor="account_type" className="label">Account Type</label>
+                            <select
+                                id="account_type"
+                                value={form.account_type}
+                                onChange={(e) => setForm({ ...form, account_type: e.target.value })}
+                                className="input"
+                            >
+                                <option value="SAVINGS">Savings</option>
+                                <option value="CHECKING">Checking / Current</option>
+                                <option value="CREDIT">Credit Card</option>
+                                <option value="INVESTMENT">Investment</option>
+                            </select>
+                        </div>
 
-            {/* Accounts List */}
-            <div className="card">
-                <h2>Your Accounts ({accounts.length})</h2>
+                        <button type="submit" className="btn-primary w-full">Create Account</button>
+                    </form>
+                </div>
 
-                {accounts.length === 0 ? (
-                    <p>No accounts found. Create your first account above to start tracking transactions.</p>
-                ) : (
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Balance</th>
-                            <th>Currency</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {accounts.map((acc, index) => (
-                            <tr key={acc.id || index}>
-                                <td><strong>{acc.account_name}</strong></td>
-                                <td>{acc.account_type || '—'}</td>
-                                <td style={{
-                                    fontWeight: 'bold',
-                                    color: Number(acc.balance ?? acc.initial_balance ?? 0) >= 0 ? '#16a34a' : '#ef4444'
-                                }}>
-                                    {formatMoney(acc.balance ?? acc.initial_balance ?? 0, acc.currency || 'INR')}
-                                </td>
-                                <td>{acc.currency || 'INR'}</td>
-                                <td>
-                                    <button
-                                        className="danger"
-                                        onClick={() => deleteAccount(acc.id)}
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                )}
+                {/* Account card matrix */}
+                <div className="lg:col-span-2">
+                    <h2 className="mb-4 text-lg font-semibold text-slate-900">Your Accounts</h2>
+
+                    {accounts.length === 0 ? (
+                        <div className="card flex flex-col items-center justify-center py-16 text-center">
+                            <p className="text-sm font-medium text-slate-600">No accounts found.</p>
+                            <p className="mt-1 text-sm text-slate-400">
+                                Create your first account above to start tracking transactions.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            {accounts.map(acc => {
+                                const value = Number(acc.balance ?? acc.initial_balance ?? 0);
+                                const badge = ACCOUNT_TYPE_BADGE[acc.account_type] || 'badge-slate';
+                                return (
+                                    <div key={acc.id || acc.account_name} className="card flex flex-col p-5 transition-shadow duration-200 hover:shadow-pop">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="truncate font-semibold text-slate-900">{acc.account_name}</p>
+                                                <p className="mt-0.5 text-xs text-slate-400">{acc.currency || 'INR'}</p>
+                                            </div>
+                                            <span className={`badge shrink-0 ${badge}`}>{acc.account_type || '—'}</span>
+                                        </div>
+
+                                        <div className="mt-6">
+                                            <p className="stat-label">Balance</p>
+                                            <p className={`mt-1 text-2xl font-semibold tabular-nums tracking-tight ${value >= 0 ? 'text-brand-700' : 'text-red-600'}`}>
+                                                {formatMoney(value, acc.currency || 'INR')}
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="btn-danger btn-sm mt-5 w-full"
+                                            onClick={() => deleteAccount(acc.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
