@@ -71,11 +71,10 @@ public class BudgetService {
         } else {
             budget.setCurrency(budget.getCurrency().toUpperCase());
         }
-        budgetRepository.save(budget);
         if (budget.getCreated_at() == null) {
             budget.setCreated_at(LocalDateTime.now());
         }
-        return budget;
+        return budgetRepository.save(budget);
     }
 
     public Budget updateBudget(int id, Budget updatedBudget) {

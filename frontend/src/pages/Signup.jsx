@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import AuthLayout from '../components/AuthLayout';
 
 export default function Signup() {
     const [step, setStep] = useState(1); // 1 = form, 2 = verify code
@@ -46,39 +47,82 @@ export default function Signup() {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '100px auto', padding: '2rem' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Finance Tracker</h1>
-            <div className="card">
-                <h2>{step === 1 ? 'Sign Up' : 'Verify Email'}</h2>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+        <AuthLayout
+            title={step === 1 ? 'Create your account' : 'Verify your email'}
+            subtitle={step === 1 ? 'Start tracking your money in minutes' : 'We sent a code to your inbox'}
+        >
+            {error && (
+                <div className="mb-5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-700 ring-1 ring-inset ring-red-600/20">
+                    {error}
+                </div>
+            )}
 
-                {step === 1 ? (
-                    <form onSubmit={handleSignup}>
-                        <input name="username" placeholder="Username" value={formData.username} onChange={handleChange} required />
-                        <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-                        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
-                        <button type="submit" className="primary" disabled={loading} style={{ width: '100%' }}>
-                            {loading ? 'Sending...' : 'Sign Up'}
-                        </button>
-                    </form>
-                ) : (
-                    <form onSubmit={handleVerify}>
+            {step === 1 ? (
+                <form onSubmit={handleSignup} className="space-y-4">
+                    <div>
+                        <label htmlFor="username" className="label">Username</label>
                         <input
+                            id="username"
+                            name="username"
+                            placeholder="Username"
+                            value={formData.username}
+                            onChange={handleChange}
+                            required
+                            className="input"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="email" className="label">Email</label>
+                        <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="Email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            className="input"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="password" className="label">Password</label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            className="input"
+                        />
+                    </div>
+                    <button type="submit" className="btn-primary w-full" disabled={loading}>
+                        {loading ? 'Sending...' : 'Sign Up'}
+                    </button>
+                </form>
+            ) : (
+                <form onSubmit={handleVerify} className="space-y-4">
+                    <div>
+                        <label htmlFor="verificationCode" className="label">Verification Code</label>
+                        <input
+                            id="verificationCode"
                             placeholder="Verification Code"
                             value={verificationCode}
                             onChange={(e) => setVerificationCode(e.target.value)}
                             required
+                            className="input"
                         />
-                        <button type="submit" className="primary" disabled={loading} style={{ width: '100%' }}>
-                            {loading ? 'Verifying...' : 'Verify'}
-                        </button>
-                    </form>
-                )}
+                    </div>
+                    <button type="submit" className="btn-primary w-full" disabled={loading}>
+                        {loading ? 'Verifying...' : 'Verify'}
+                    </button>
+                </form>
+            )}
 
-                <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-                    Already have an account? <Link to="/login">Login</Link>
-                </p>
-            </div>
-        </div>
+            <p className="mt-6 text-center text-sm text-slate-500">
+                Already have an account? <Link to="/login" className="link">Login</Link>
+            </p>
+        </AuthLayout>
     );
 }
