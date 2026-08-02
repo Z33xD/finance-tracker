@@ -1,66 +1,241 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ============================================================
+   FINANCE TRACKER — GLOBAL UI THEME BLUEPRINT
+   Refined luxury aesthetic · Emerald brand + Slate neutrals
+   Tailwind v4 (CSS-first configuration)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+/* ============================================================
+   1. DESIGN TOKENS
+   ============================================================ */
+
+@theme {
+  /* ---- Brand palette: deep, authoritative emerald ---- */
+  --color-brand-50: #f0f9f4;
+  --color-brand-100: #dbf1e3;
+  --color-brand-200: #b8e3c9;
+  --color-brand-300: #86cda7;
+  --color-brand-400: #4fb284;
+  --color-brand-500: #2e9e6e;
+  --color-brand-600: #1f8455;   /* primary action */
+  --color-brand-700: #1a6b47;
+  --color-brand-800: #175539;
+  --color-brand-900: #144630;
+  --color-brand-950: #0a271a;
+
+  /* ---- Typography ---- */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', 'Inter', ui-serif, Georgia, serif;
+
+  /* ---- Shadows: soft, diffused, low-key luxury ---- */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(15 23 42 / 0.08);
+  --shadow-pop: 0 4px 8px -2px rgb(15 23 42 / 0.08), 0 16px 32px -8px rgb(15 23 42 / 0.12);
+
+  /* ---- Radii ---- */
+  --radius-card: 1rem;
 }
 
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f8fafc;
-  color: #1e2937;
+/* ============================================================
+   1b. CUSTOM UTILITIES — composable primitives
+   ============================================================ */
+
+@utility btn {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5
+         text-sm font-medium transition-colors duration-150
+         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600
+         disabled:pointer-events-none disabled:opacity-50;
 }
 
-h1, h2 {
-  margin-bottom: 1rem;
+@utility amount {
+  @apply font-semibold tabular-nums;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
+@utility badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
 }
 
-th, td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+/* ============================================================
+   2. BASE LAYER — global typography & primitives
+   ============================================================ */
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    @apply antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-slate-50 font-sans text-slate-600;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display font-medium tracking-tight text-slate-900;
+  }
+
+  h1 { @apply text-3xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-lg; }
+
+  ::selection {
+    @apply bg-brand-600/15 text-brand-900;
+  }
+
+  /* Form primitives — existing pages use bare elements; keeps them refined */
+  input, select, textarea {
+    @apply w-full rounded-lg border-0 bg-white px-3.5 py-2.5 text-sm text-slate-900
+           ring-1 ring-inset ring-slate-200 transition-shadow outline-none
+           placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
 }
 
-button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-}
+/* ============================================================
+   3. COMPONENT LAYER — reusable classes across all pages
+   ============================================================ */
 
-button.primary {
-  background: #3b82f6;
-  color: white;
-}
+@layer components {
+  /* ---- Page shell ---- */
+  .page {
+    @apply mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8;
+  }
 
-button.danger {
-  background: #ef4444;
-  color: white;
-}
+  /* ---- Surfaces ---- */
+  .card {
+    @apply rounded-(--radius-card) bg-white p-6 shadow-card ring-1 ring-slate-900/5;
+  }
 
-input, select {
-  padding: 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  width: 100%;
-  margin-bottom: 10px;
-}
+  .card-title {
+    @apply mb-1 text-lg font-semibold text-slate-900;
+  }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
+  .card-subtitle {
+    @apply mb-5 text-sm text-slate-500;
+  }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  nav { flex-direction: column; gap: 1rem; }
+  /* ---- Buttons ---- */
+  .btn-primary {
+    @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white shadow-sm hover:bg-red-700;
+  }
+
+  .btn-outline {
+    @apply btn bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300;
+  }
+
+  .btn-ghost {
+    @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  /* Backwards-compatible aliases used by current pages */
+  .primary {
+    @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700;
+  }
+
+  .danger {
+    @apply btn bg-red-600 text-white shadow-sm hover:bg-red-700;
+  }
+
+  /* ---- Forms ---- */
+  .field {
+    @apply mb-4;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+
+  .input {
+    @apply w-full rounded-lg border-0 bg-white px-3.5 py-2.5 text-sm text-slate-900
+           ring-1 ring-inset ring-slate-200 transition-shadow outline-none
+           placeholder:text-slate-400 focus:ring-2 focus:ring-brand-600;
+  }
+
+  .hint {
+    @apply mt-1.5 text-xs text-slate-400;
+  }
+
+  /* ---- Tables: quiet borders, elegant density ---- */
+  .table {
+    @apply w-full text-sm;
+  }
+
+  .table thead th {
+    @apply border-b border-slate-200 px-3 py-2.5 text-left text-xs font-semibold
+           uppercase tracking-wider text-slate-500;
+  }
+
+  .table tbody td {
+    @apply border-b border-slate-100 px-3 py-3 text-slate-700;
+  }
+
+  .table tbody tr {
+    @apply transition-colors duration-150;
+  }
+
+  .table tbody tr:hover {
+    @apply bg-slate-50/70;
+  }
+
+  /* ---- Money: elegant, aligned numerals ---- */
+  .amount-pos {
+    @apply amount text-brand-700;
+  }
+
+  .amount-neg {
+    @apply amount text-red-600;
+  }
+
+  .amount-muted {
+    @apply amount text-slate-500;
+  }
+
+  /* ---- Badges ---- */
+  .badge-emerald {
+    @apply badge bg-brand-50 text-brand-700 ring-brand-600/20;
+  }
+
+  .badge-slate {
+    @apply badge bg-slate-100 text-slate-700 ring-slate-500/20;
+  }
+
+  .badge-red {
+    @apply badge bg-red-50 text-red-700 ring-red-600/20;
+  }
+
+  /* ---- Dashboard stat card ---- */
+  .stat {
+    @apply rounded-(--radius-card) bg-white p-5 shadow-card ring-1 ring-slate-900/5;
+  }
+
+  .stat-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+
+  .stat-value {
+    @apply mt-2 text-2xl font-semibold tabular-nums tracking-tight text-slate-900;
+  }
+
+  /* ---- Links ---- */
+  .link {
+    @apply text-brand-700 underline decoration-brand-600/40 underline-offset-4
+           transition-colors hover:text-brand-800 hover:decoration-brand-600;
+  }
 }
