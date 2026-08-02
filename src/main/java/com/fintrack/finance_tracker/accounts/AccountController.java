@@ -28,6 +28,12 @@ public class AccountController {
         return accountService.getAccountsByUserId(currentUser.getId());
     }
 
+    @GetMapping("/summary")
+    public AccountSummary getAccountSummary(@RequestParam(required = false) String base) {
+        User currentUser = getAuthenticatedUser();
+        return accountService.getAccountSummary(currentUser.getId(), base);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Account> getAccountById(@PathVariable int id) {
         User currentUser = getAuthenticatedUser();

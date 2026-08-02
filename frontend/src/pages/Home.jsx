@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { formatMoney } from '../utils/format';
 
 export default function Home() {
     const { user } = useAuth();
     const [balance, setBalance] = useState(0);
+    const [baseCurrency, setBaseCurrency] = useState('INR');
     const [recentTx, setRecentTx] = useState([]);
+    const [accountCurrencies, setAccountCurrencies] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,20 +17,21 @@ export default function Home() {
             setLoading(true);
             setError(null);
             try {
-                const [accRes, txRes] = await Promise.all([
-                    api.get('/api/accounts/'),
+                const [summaryRes, txRes] = await Promise.all([
+                    api.get('/api/accounts/summary'),
                     api.get('/api/transactions/')
                 ]);
 
                 // ← SAFE HANDLING: make sure we have arrays
-                let accounts = [];
-                if (Array.isArray(accRes.data)) {
-                    accounts = accRes.data;
-                } else if (accRes.data?.content && Array.isArray(accRes.data.content)) {
-                    accounts = accRes.data.content;   // common paginated response
-                } else if (accRes.data) {
-                    accounts = [accRes.data];         // single object fallback
-                }
+                const summary = summaryRes.data || {};
+                const accounts = summary.accounts || [];
+                const currencyMap = {};
+                accounts.forEach(acc => {
+                    if (acc && acc.id) currencyMap[acc.id] = acc.currency || 'INR';
+                });
+                setAccountCurrencies(currencyMap);
+                setBalance(Number(summary.total || 0));
+                setBaseCurrency(summary.base || 'INR');
 
                 let transactions = [];
                 if (Array.isArray(txRes.data)) {
@@ -39,16 +43,8 @@ export default function Home() {
                 }
 
                 setRecentTx(transactions.slice(0, 5));
-
-                // Sum all account balances
-                const total = accounts.reduce((sum, acc) => {
-                    if (!acc) return sum;
-                    return sum + Number(acc.balance ?? acc.initial_balance ?? 0);
-                }, 0);
-
-                setBalance(total);
             } catch (err) {
-                console.error("Failed to fetch accounts:", err);
+                console.error("Failed to fetch dashboard data:", err);
                 setError("Could not load dashboard data. Please try refreshing.");
             } finally {
                 setLoading(false);
@@ -77,7 +73,7 @@ export default function Home() {
                     color: balance >= 0 ? '#16a34a' : '#ef4444',
                     margin: '0.5rem 0'
                 }}>
-                    ₹{balance.toFixed(2)}
+                    {formatMoney(balance, baseCurrency)}
                 </h1>
             </div>
 
@@ -106,7 +102,7 @@ export default function Home() {
                                         ? '#16a34a' : '#ef4444'
                                 }}>
                                     {(tx.transactionType === 'INCOME' || tx.transactionType === 'CREDIT') ? '+' : '-'}
-                                    ₹{tx.amount || 0}
+                                    {formatMoney(tx.amount || 0, accountCurrencies[tx.account_id] || baseCurrency)}
                                 </td>
                                 <td>{tx.transactionType || 'EXPENSE'}</td>
                             </tr>

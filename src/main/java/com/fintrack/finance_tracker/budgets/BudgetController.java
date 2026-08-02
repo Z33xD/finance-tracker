@@ -1,5 +1,6 @@
 package com.fintrack.finance_tracker.budgets;
 
+import com.fintrack.finance_tracker.exchange_rates.BaseCurrencyResolver;
 import com.fintrack.finance_tracker.users.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,10 +16,12 @@ import java.util.List;
 @RequestMapping(path = "/api/budgets/")
 public class BudgetController {
     private final BudgetService budgetService;
+    private final BaseCurrencyResolver baseCurrencyResolver;
 
     @Autowired
-    public BudgetController(BudgetService budgetService) {
+    public BudgetController(BudgetService budgetService, BaseCurrencyResolver baseCurrencyResolver) {
         this.budgetService = budgetService;
+        this.baseCurrencyResolver = baseCurrencyResolver;
     }
 
     // TODO: GET /api/budgets (Retrieve all budgets for the authenticated user)
@@ -35,6 +38,12 @@ public class BudgetController {
         }
 
         return budgetService.getBudgetsByUserId(currentUser.getId());
+    }
+
+    @GetMapping("/summary")
+    public List<BudgetSummary> getBudgetSummaries() {
+        User currentUser = getAuthenticatedUser();
+        return budgetService.getBudgetSummaries(currentUser.getId());
     }
 
     @GetMapping("/{id}")
@@ -54,6 +63,9 @@ public class BudgetController {
     public ResponseEntity<Budget> addBudget(@RequestBody Budget budget) {
         User currentUser = getAuthenticatedUser();
         budget.setUser_id(currentUser.getId());
+        if (budget.getCurrency() == null || budget.getCurrency().isBlank()) {
+            budget.setCurrency(baseCurrencyResolver.resolveForUser(currentUser.getId()));
+        }
         Budget createdBudget = budgetService.addBudget(budget);
         return new ResponseEntity<>(createdBudget, HttpStatus.CREATED);
     }
