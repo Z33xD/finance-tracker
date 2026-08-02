@@ -26,6 +26,13 @@ This is a Spring Boot based application that [I](https://www.github.com/Z33xD) m
 - **CSV Bulk Imports:** High-performance transactional ingestion handling bulk data with custom duplicate detection, historical logging, and `import_batch` error metrics tracking.
 - **Live Exchange Rates:** Dynamically handles currency conversions across assets using integration hooks with the external [ExchangeRate-API](https://www.exchangerate-api.com/).
 
+### Multi-Currency Support
+- Accounts and budgets are each denominated in their own currency (all ~160 ExchangeRate-API codes are supported).
+- Amounts are always stored in their native currency; conversion happens only at read/summary time via stored `exchange_rates` pairs for the transaction's date.
+- The reporting currency is derived from your first-created account, and `GET /api/accounts/summary` converts every account balance into it for the dashboard total.
+- `GET /api/budgets/summary` computes actual spending converted into each budget's own currency.
+- Cross-rates are derived through the reporting currency as an anchor; rates refresh on demand (cached once per day) or manually via `POST /api/exchange-rates/refresh`.
+
 ---
 ## Architecture & Tech Stack
 
