@@ -143,37 +143,36 @@ public class AuthenticationService {
                 "<html>\n" +
                 "<head>\n" +
                 "  <meta charset=\"UTF-8\">\n" +
-                "  <title>Verify your Finance Tracker account</title>\n" +
+                "  <title>Verification Email</title>\n" +
                 "</head>\n" +
-                "<body style=\"margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color:#f6f3ec;\">\n" +
-                "  <div style=\"width:100%; padding:24px 0; background-color:#f6f3ec;\">\n" +
+                "<body style=\"margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f5f5f5;\">\n" +
+                "  <div style=\"width:100%; padding:20px 0; background-color:#f5f5f5;\">\n" +
                 "    \n" +
-                "    <div style=\"max-width:600px; margin:0 auto; background-color:#fbfaf6; border-radius:12px; overflow:hidden; box-shadow:0 8px 24px rgba(20, 70, 48, 0.08); border:1px solid #ede7d9;\">\n" +
-                "      <div style=\"background-color:#1f8455; color:#ffffff; padding:24px; text-align:center;\">\n" +
-                "        <h2 style=\"margin:0; font-family: Georgia, 'Times New Roman', serif; letter-spacing:0.5px;\">Finance Tracker</h2>\n" +
+                "    <div style=\"max-width:600px; margin:0 auto; background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 0 10px rgba(0,0,0,0.1);\">\n" +
+                "      <div style=\"background-color:#007bff; color:#ffffff; padding:20px; text-align:center;\">\n" +
+                "        <h2 style=\"margin:0;\">Finance Tracker</h2>\n" +
                 "      </div>\n" +
                 "      \n" +
-                "      <div style=\"padding:32px; color:#334155;\">\n" +
+                "      <div style=\"padding:30px; color:#333333;\">\n" +
                 "        <p style=\"font-size:16px; margin:0 0 15px;\">\n" +
                 "          Hello!\n" +
                 "        </p>\n" +
                 "\n" +
-                "        <p style=\"font-size:16px; line-height:1.5; margin:0 0 20px;\">\n" +
+                "        <p style=\"font-size:16px; margin:0 0 20px;\">\n" +
                 "          Please use the verification code below to complete your sign-up process:\n" +
                 "        </p>\n" +
                 "        \n" +
-                "        <div style=\"background-color:#f0f9f4; padding:24px; text-align:center; border-radius:8px; border:1px solid #b8e3c9;\">\n" +
-                "          <p style=\"margin:0; font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#64748b;\">Your Verification Code</p>\n" +
-                "          <p style=\"margin:10px 0 0; font-size:28px; font-weight:bold; letter-spacing:4px; color:#1a6b47;\">\n" +
+                "        <div style=\"background-color:#f9f9f9; padding:20px; text-align:center; border-radius:6px; border:1px solid #dddddd;\">\n" +
+                "          <p style=\"margin:0; font-size:14px; color:#666;\">Your Verification Code</p>\n" +
+                "          <p style=\"margin:10px 0 0; font-size:24px; font-weight:bold; color:#007bff;\">\n" +
                                verificationCode +
                 "          </p>\n" +
                 "        </div>\n" +
                 "\n" +
-                "        <p style=\"font-size:14px; line-height:1.5; margin:20px 0 0; color:#64748b;\">\n" +
+                "        <p style=\"font-size:14px; margin:20px 0 0; color:#666;\">\n" +
                 "          This code will expire in 15 minutes. If you did not request this, please ignore this email.\n" +
                 "        </p>\n" +
                 "      </div>\n" +
-                "\n" +
                 "    </div>\n" +
                 "\n" +
                 "  </div>\n" +

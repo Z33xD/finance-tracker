@@ -1,0 +1,21 @@
+name: Send verification email
+
+on:
+  repository_dispatch:
+    types: [send-verification-email]
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send mail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SUPPORT_EMAIL }}
+          password: ${{ secrets.APP_PASSWORD }}
+          from: Finance Tracker <${{ secrets.SUPPORT_EMAIL }}>
+          to: ${{ github.event.client_payload.to }}
+          subject: ${{ github.event.client_payload.subject }}
+          html_body: ${{ github.event.client_payload.html }}
