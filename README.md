@@ -115,3 +115,62 @@ npm run dev
 The frontend, by default, runs on: http://localhost:5173/
 
 ---
+
+## Keep-Alive — Render & Supabase Free Tier
+
+This project is deployed on Render (free tier) with Supabase Postgres (free tier). Both tiers pause on inactivity, so keep-alive probes are required.
+
+### Endpoints
+
+| Endpoint | Purpose | Auth | Implementation |
+|----------|---------|------|----------------|
+| `GET /health` | Lightweight liveness probe — returns `{"status":"ok"}` with **no DB call**. Also available as `GET /actuator/health` via Spring Boot Actuator. | `permitAll` | `health.HealthController` |
+| `GET /health/db` | DB keep-alive — runs `SELECT 1` via `JdbcTemplate` and returns `{"status":"db_ok"}` (or `503` with `{"status":"db_error"}` on failure). | `permitAll` | `health.HealthController` → `health.DatabaseHealthService` |
+
+Both paths are explicitly whitelisted in `config.SecurityConfiguration` and skipped in `config.JwtAuthenticationFilter#shouldNotFilter`.
+
+An internal backup is also scheduled in `config.SchedulingConfiguration`:
+
+```java
+@Scheduled(fixedRate = 259200000) // every 3 days
+public void pingDatabasePeriodically() { databaseHealthService.pingDatabase(); }
+```
+
+> **Note:** The `@Scheduled` ping only fires while the JVM is actually running. Render free tier **suspends the whole process** on spin-down, so this scheduler cannot wake a sleeping instance on its own — it is purely a backup while the app is already being kept awake externally.
+
+### External pinger setup (required outside this codebase)
+
+You must configure an **external** scheduled pinger. Two independent schedules are recommended:
+
+**a) Render — prevent spin-down (every 10–14 minutes)**
+
+Render free web services sleep after **~15 minutes** of no inbound traffic (cold start on next request). Configure one of these to hit `GET /health` (or `/actuator/health`) every **10–14 minutes** — staying safely under the 15-minute idle threshold:
+
+- [cron-job.org](https://cron-job.org) — create a job with URL `https://<your-app>.onrender.com/health`, interval 10–14 min, GET.
+- [UptimeRobot](https://uptimerobot.com) — monitor type HTTP(s), interval 10 min (or 5 min on paid plan), keyword `ok`.
+- **GitHub Actions workflow** (cron trigger) — add `.github/workflows/keep-alive.yml`:
+
+```yaml
+name: keep-alive
+on:
+  schedule:
+    - cron: '*/12 * * * *'  # every 12 minutes
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS https://<your-app>.onrender.com/health
+```
+
+Use the lightweight `/health` (not `/health/db`) for this frequent ping to avoid unnecessary DB load.
+
+**b) Supabase — prevent database pausing (every 3–4 days)**
+
+Supabase free projects pause after **~7 days** of database inactivity (no queries). Configure a second, much less frequent job to hit `GET /health/db` every **3–4 days**:
+
+- Same providers as above — e.g. a second cron-job.org job at `https://<your-app>.onrender.com/health/db` on a 3-day schedule, or a GitHub Actions workflow with `cron: '0 9 */3 * *'` (every 3 days at 09:00 UTC).
+
+The internal `@Scheduled(fixedRate = 259200000)` (3-day) DB ping in `SchedulingConfiguration` reuses `DatabaseHealthService.pingDatabase()` as a best-effort backup, but should not be relied on alone for the reason noted above.
+
+---
